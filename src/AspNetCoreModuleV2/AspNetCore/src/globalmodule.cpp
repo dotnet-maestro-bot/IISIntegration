@@ -1,4 +1,4 @@
-#include "precomp.hxx"
+#include "globalmodule.h"
 
 ASPNET_CORE_GLOBAL_MODULE::ASPNET_CORE_GLOBAL_MODULE(
     APPLICATION_MANAGER* pApplicationManager)

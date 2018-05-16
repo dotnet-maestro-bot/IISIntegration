@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include "precomp.hxx"
+#include "applicationinfo.h"
+
 extern HTTP_MODULE_ID   g_pModuleId;
 extern IHttpServer     *g_pHttpServer;
 extern HMODULE          g_hAspnetCoreRH;

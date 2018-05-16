@@ -2,7 +2,11 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 #include "precomp.hxx"
-#include <IPHlpApi.h>
+#include "applicationinfo.h"
+#include "applicationmanager.h"
+#include "proxymodule.h"
+#include "globalmodule.h"
+#include "acache.h"
 
 HTTP_MODULE_ID      g_pModuleId = NULL;
 IHttpServer *       g_pHttpServer = NULL;
