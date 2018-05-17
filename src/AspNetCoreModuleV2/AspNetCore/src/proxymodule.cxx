@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 #include "proxymodule.h"
+
 #include "applicationmanager.h"
 #include "applicationinfo.h"
 #include "acache.h"

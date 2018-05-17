@@ -2,7 +2,10 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 #include "applicationmanager.h"
+
 #include "proxymodule.h"
+#include "utility.h"
+
 // The application manager is a singleton across ANCM.
 APPLICATION_MANAGER* APPLICATION_MANAGER::sm_pApplicationManager = NULL;
 

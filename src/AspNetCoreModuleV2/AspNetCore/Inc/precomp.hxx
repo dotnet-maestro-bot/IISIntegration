@@ -16,8 +16,15 @@
 #include <Windows.h>
 #include <atlbase.h>
 #include <httpserv.h>
+
 #include "stringu.h"
 #include "stringa.h"
+
+#include "ntassert.h"
+#include "dbgutil.h"
+
+#include "aspnetcore_msg.h"
+#include "resources.h"
 
 FORCEINLINE
 DWORD
@@ -53,4 +60,5 @@ extern HMODULE      g_hAspnetCoreRH;
 extern SRWLOCK      g_srwLock;
 extern PCWSTR       g_pwzAspnetcoreRequestHandlerName;
 extern HANDLE       g_hEventLog;
+
 #pragma warning( error : 4091)

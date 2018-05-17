@@ -2,8 +2,13 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 #include "applicationinfo.h"
-#include "aspnetcoreconfig.h"
+
 #include "proxymodule.h"
+#include "hostfxr_utility.h"
+#include "utility.h"
+
+const PCWSTR APPLICATION_INFO::s_pwzAspnetcoreInProcessRequestHandlerName = L"aspnetcorev2_inprocess.dll";
+const PCWSTR APPLICATION_INFO::s_pwzAspnetcoreOutOfProcessRequestHandlerName = L"aspnetcorev2_outofprocess.dll";
 
 APPLICATION_INFO::~APPLICATION_INFO()
 {

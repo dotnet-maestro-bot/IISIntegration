@@ -8,7 +8,6 @@
 #include "applicationinfo.h"
 #include "multisz.h"
 #include "filewatcher.h"
-#include "aspnetcoreconfig.h"
 
 #define DEFAULT_HASH_BUCKETS 17
 

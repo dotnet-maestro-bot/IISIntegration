@@ -4,7 +4,9 @@
 #pragma once
 
 #include "precomp.hxx"
+
 #include "applicationinfo.h"
+#include "irequesthandler.h"
 
 extern HTTP_MODULE_ID   g_pModuleId;
 extern IHttpServer     *g_pHttpServer;

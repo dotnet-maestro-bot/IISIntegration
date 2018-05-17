@@ -7,7 +7,10 @@
 
 #include "appoffline.h"
 #include "filewatcher.h"
-#include "aspnetcoreconfig.h"
+#include "hashtable.h"
+#include "hashfn.h"
+#include "aspnetcore_shim_config.h"
+#include "iapplication.h"
 
 #define API_BUFFER_TOO_SMALL 0x80008098
 
@@ -175,6 +178,9 @@ private:
     SRWLOCK                 m_srwLock;
     IHttpServer            *m_pServer;
     PFN_ASPNETCORE_CREATE_APPLICATION      m_pfnAspNetCoreCreateApplication;
+
+    static const PCWSTR          s_pwzAspnetcoreInProcessRequestHandlerName;
+    static const PCWSTR          s_pwzAspnetcoreOutOfProcessRequestHandlerName;
 };
 
 class APPLICATION_INFO_HASH :

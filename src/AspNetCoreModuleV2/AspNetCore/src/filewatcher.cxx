@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 #include "filewatcher.h"
+
 #include "ntassert.h"
 #include "applicationinfo.h"
 
