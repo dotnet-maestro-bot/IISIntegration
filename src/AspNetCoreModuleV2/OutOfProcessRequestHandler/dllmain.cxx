@@ -12,7 +12,6 @@ BOOL                g_fOutOfProcessInitializeError = FALSE;
 BOOL                g_fWinHttpNonBlockingCallbackAvailable = FALSE;
 BOOL                g_fProcessDetach = FALSE;
 DWORD               g_OptionalWinHttpFlags = 0;
-DWORD               g_dwAspNetCoreDebugFlags = 0;
 DWORD               g_dwDebugFlags = 0;
 DWORD               g_dwTlsIndex = TLS_OUT_OF_INDEXES;
 SRWLOCK             g_srwLockRH;
@@ -87,20 +86,9 @@ InitializeGlobalConfiguration(
             {
                 g_fEnableReferenceCountTracing = !!dwData;
             }
-
-            cbData = sizeof(dwData);
-            if ((RegQueryValueEx(hKey,
-                L"DebugFlags",
-                NULL,
-                &dwType,
-                (LPBYTE)&dwData,
-                &cbData) == NO_ERROR) &&
-                (dwType == REG_DWORD))
-            {
-                g_dwAspNetCoreDebugFlags = dwData;
-            }
-            RegCloseKey(hKey);
         }
+
+        DebugInitialize();
 
         dwResult = GetExtendedTcpTable(NULL,
             &dwSize,

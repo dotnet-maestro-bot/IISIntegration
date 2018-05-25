@@ -20,7 +20,6 @@ HMODULE             g_hAspnetCoreRH = NULL;
 BOOL                g_fAspnetcoreRHAssemblyLoaded = FALSE;
 BOOL                g_fAspnetcoreRHLoadedError = FALSE;
 BOOL                g_fInShutdown = FALSE;
-DWORD               g_dwAspNetCoreDebugFlags = 0;
 DWORD               g_dwActiveServerProcesses = 0;
 SRWLOCK             g_srwLock;
 DWORD               g_dwDebugFlags = 0;
@@ -147,20 +146,10 @@ HRESULT
             fDisableANCM = (dwData != 0);
         }
 
-        cbData = sizeof(dwData);
-        if ((RegQueryValueEx(hKey,
-            L"DebugFlags",
-            NULL,
-            &dwType,
-            (LPBYTE)&dwData,
-            &cbData) == NO_ERROR) &&
-            (dwType == REG_DWORD))
-        {
-            g_dwAspNetCoreDebugFlags = dwData;
-        }
-
         RegCloseKey(hKey);
     }
+
+    DebugInitialize();
 
     if (fDisableANCM)
     {

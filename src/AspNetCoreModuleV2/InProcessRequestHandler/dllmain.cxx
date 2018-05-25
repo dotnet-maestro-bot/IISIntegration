@@ -13,7 +13,6 @@
 
 BOOL                g_fGlobalInitialize = FALSE;
 BOOL                g_fProcessDetach = FALSE;
-DWORD               g_dwAspNetCoreDebugFlags = 0;
 DWORD               g_dwDebugFlags = 0;
 SRWLOCK             g_srwLockRH;
 IHttpServer *       g_pHttpServer = NULL;
@@ -27,7 +26,6 @@ InitializeGlobalConfiguration(
     IHttpServer * pServer
 )
 {
-    HKEY hKey;
     BOOL fLocked = FALSE;
 
     if (!g_fGlobalInitialize)
@@ -51,29 +49,7 @@ InitializeGlobalConfiguration(
             g_hEventLog = RegisterEventSource(NULL, ASPNETCORE_EVENT_PROVIDER);
         }
 
-        if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
-            L"SOFTWARE\\Microsoft\\IIS Extensions\\IIS AspNetCore Module\\Parameters",
-            0,
-            KEY_READ,
-            &hKey) == NO_ERROR)
-        {
-            DWORD dwType;
-            DWORD dwData;
-            DWORD cbData;
-
-            cbData = sizeof(dwData);
-            if ((RegQueryValueEx(hKey,
-                L"DebugFlags",
-                NULL,
-                &dwType,
-                (LPBYTE)&dwData,
-                &cbData) == NO_ERROR) &&
-                (dwType == REG_DWORD))
-            {
-                g_dwAspNetCoreDebugFlags = dwData;
-            }
-            RegCloseKey(hKey);
-        }
+        DebugInitialize();
 
         g_fGlobalInitialize = TRUE;
     }

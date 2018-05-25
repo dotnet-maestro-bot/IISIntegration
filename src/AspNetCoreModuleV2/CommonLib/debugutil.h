@@ -6,7 +6,39 @@
 #define ASPNETCORE_DEBUG_FLAG_WARNING       0x00000002
 #define ASPNETCORE_DEBUG_FLAG_ERROR         0x00000004
 
-extern DWORD g_dwAspNetCoreDebugFlags;
+static DWORD g_dwAspNetCoreDebugFlags;
+
+static
+inline
+VOID
+DebugInitialize()
+{
+    HKEY hKey;
+
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+            L"SOFTWARE\\Microsoft\\IIS Extensions\\IIS AspNetCore Module\\Parameters",
+            0,
+            KEY_READ,
+            &hKey) == NO_ERROR)
+    {
+        DWORD dwType;
+        DWORD dwData;
+        DWORD cbData;
+
+        cbData = sizeof(dwData);
+        if ((RegQueryValueEx(hKey,
+            L"DebugFlags",
+            NULL,
+            &dwType,
+            (LPBYTE)&dwData,
+            &cbData) == NO_ERROR) &&
+            (dwType == REG_DWORD))
+        {
+            g_dwAspNetCoreDebugFlags = dwData;
+        }
+        RegCloseKey(hKey);
+    }
+}
 
 static
 BOOL
@@ -29,7 +61,7 @@ DebugPrint(
 
     if ( IfDebug( dwFlag ) )
     {
-        hr = strOutput.SafeSnprintf( 
+        hr = strOutput.SafeSnprintf(
             "[aspnetcore.dll] %s\r\n",
             szString );
 
