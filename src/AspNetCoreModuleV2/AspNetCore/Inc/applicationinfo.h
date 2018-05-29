@@ -5,6 +5,7 @@
 
 #include "precomp.hxx"
 
+#include "hostfxroptions.h"
 #include "appoffline.h"
 #include "filewatcher.h"
 #include "hashtable.h"

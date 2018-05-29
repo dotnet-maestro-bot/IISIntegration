@@ -5,6 +5,7 @@
 
 #include "proxymodule.h"
 #include "utility.h"
+#include <memory>
 
 // The application manager is a singleton across ANCM.
 APPLICATION_MANAGER* APPLICATION_MANAGER::sm_pApplicationManager = NULL;

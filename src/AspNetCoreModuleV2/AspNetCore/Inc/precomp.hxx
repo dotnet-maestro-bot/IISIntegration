@@ -26,6 +26,8 @@
 #include "aspnetcore_msg.h"
 #include "resources.h"
 
+#include <memory>
+
 FORCEINLINE
 DWORD
 WIN32_FROM_HRESULT(

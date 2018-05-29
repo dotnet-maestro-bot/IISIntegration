@@ -4,7 +4,6 @@
 #include "applicationinfo.h"
 
 #include "proxymodule.h"
-#include "hostfxr_utility.h"
 #include "utility.h"
 
 const PCWSTR APPLICATION_INFO::s_pwzAspnetcoreInProcessRequestHandlerName = L"aspnetcorev2_inprocess.dll";
@@ -265,11 +264,11 @@ APPLICATION_INFO::FindRequestHandlerAssembly(STRU& location)
 
         if (m_pConfiguration->QueryHostingModel() == APP_HOSTING_MODEL::HOSTING_IN_PROCESS)
         {
-            pstrHandlerDllName = g_pwzAspnetcoreInProcessRequestHandlerName;
+            pstrHandlerDllName = s_pwzAspnetcoreInProcessRequestHandlerName;
         }
         else
         {
-            pstrHandlerDllName = g_pwzAspnetcoreOutOfProcessRequestHandlerName;
+            pstrHandlerDllName = s_pwzAspnetcoreOutOfProcessRequestHandlerName;
         }
 
         // Try to see if RH is already loaded
@@ -279,7 +278,7 @@ APPLICATION_INFO::FindRequestHandlerAssembly(STRU& location)
         {
             if (m_pConfiguration->QueryHostingModel() == APP_HOSTING_MODEL::HOSTING_IN_PROCESS)
             {
-                std:: unique_ptr<HOSTFXR_OPTIONS> options;
+                std::unique_ptr<HOSTFXR_OPTIONS> options;
 
                 if (FAILED(hr = HOSTFXR_OPTIONS::Create(
                     NULL,
