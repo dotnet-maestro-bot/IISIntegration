@@ -4,6 +4,7 @@
 #include "applicationinfo.h"
 
 #include "proxymodule.h"
+#include "hostfxr_utility.h"
 #include "utility.h"
 
 const PCWSTR APPLICATION_INFO::s_pwzAspnetcoreInProcessRequestHandlerName = L"aspnetcorev2_inprocess.dll";
