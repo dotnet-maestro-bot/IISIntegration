@@ -358,7 +358,7 @@ HOSTFXR_UTILITY::GetAbsolutePathToHostFxr(
 )
 {
     std::vector<std::wstring> versionFolders;
-    const auto hostFxrBase = dotnetPath.parent_path().append("host").append("fxr");
+    const auto hostFxrBase = dotnetPath.parent_path() / "host" / "fxr";
 
     if (!is_directory(hostFxrBase))
     {
@@ -378,7 +378,7 @@ HOSTFXR_UTILITY::GetAbsolutePathToHostFxr(
     }
 
     const auto highestVersion = FindHighestDotNetVersion(versionFolders);
-    const auto hostFxrPath = fs::path(hostFxrBase).append(highestVersion).append("hostfxr.dll");
+    const auto hostFxrPath = hostFxrBase  / highestVersion / "hostfxr.dll";
 
     if (!is_regular_file(hostFxrPath))
     {
@@ -603,7 +603,7 @@ Finished:
 std::optional<fs::path>
 HOSTFXR_UTILITY::GetAbsolutePathToDotnetFromProgramFiles()
 {
-    const auto programFilesDotnet = fs::path(ExpandEnvironmentVariables(L"%ProgramFiles%")).append("dotnet").append("dotnet.exe");
+    const auto programFilesDotnet = fs::path(ExpandEnvironmentVariables(L"%ProgramFiles%")) / "dotnet" / "dotnet.exe";
     return is_regular_file(programFilesDotnet) ? std::make_optional(programFilesDotnet) : std::nullopt;
 }
 
@@ -653,7 +653,7 @@ HOSTFXR_UTILITY::FindDotNetFolders(
 std::wstring
 HOSTFXR_UTILITY::ExpandEnvironmentVariables(const std::wstring & str)
 {
-    DWORD requestedSize = ExpandEnvironmentStrings(str.c_str(), nullptr, 0);
+    DWORD requestedSize = ExpandEnvironmentStringsW(str.c_str(), nullptr, 0);
     if (requestedSize == 0)
     {
         throw std::system_error(GetLastError(), std::system_category(), "ExpandEnvironmentVariables");
@@ -663,12 +663,15 @@ HOSTFXR_UTILITY::ExpandEnvironmentVariables(const std::wstring & str)
     do
     {
         expandedStr.resize(requestedSize);
-        requestedSize = ExpandEnvironmentStrings(str.c_str(), &expandedStr[0], requestedSize);
+        requestedSize = ExpandEnvironmentStringsW(str.c_str(), &expandedStr[0], requestedSize);
         if (requestedSize == 0)
         {
             throw std::system_error(GetLastError(), std::system_category(), "ExpandEnvironmentVariables");
         }
     } while (expandedStr.size() != requestedSize);
+
+    // trim null character
+    expandedStr.resize(requestedSize - 1);
 
     return expandedStr;
 }
