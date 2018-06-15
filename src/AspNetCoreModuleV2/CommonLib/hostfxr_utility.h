@@ -6,10 +6,8 @@
 #include "precomp.h"
 
 #include <vector>
-#include <filesystem>
+#include <experimental/filesystem>
 #include <optional>
-
-namespace fs = std::filesystem;
 
 typedef INT(*hostfxr_get_native_search_directories_fn) (CONST INT argc, CONST PCWSTR* argv, PWSTR buffer, DWORD buffer_size, DWORD* required_buffer_size);
 typedef INT(*hostfxr_main_fn) (CONST DWORD argc, CONST PCWSTR argv[]);
@@ -76,24 +74,24 @@ public:
     );
 
     static
-    std::optional<fs::path>
+    std::optional<std::experimental::filesystem::path>
     GetAbsolutePathToHostFxr(
-        _In_ fs::path & dotnetPath,
+        _In_ const std::experimental::filesystem::path & dotnetPath,
         _In_ HANDLE hEventLog
     );
 
     static
-    std::optional<fs::path>
+    std::optional<std::experimental::filesystem::path>
     GetAbsolutePathToDotnetFromProgramFiles();
 
     static
-    std::optional<fs::path>
+    std::optional<std::experimental::filesystem::path>
     InvokeWhereToFindDotnet();
 
     static
-    std::optional<fs::path>
+    std::optional<std::experimental::filesystem::path>
     GetAbsolutePathToDotnet(
-        _In_ fs::path & requestedPath
+        _In_ const std::experimental::filesystem::path & requestedPath
     );
 
     static
