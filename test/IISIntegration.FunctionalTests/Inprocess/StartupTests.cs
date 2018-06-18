@@ -138,7 +138,6 @@ namespace Microsoft.AspNetCore.Server.IISIntegration.FunctionalTests
                 ApplicationType = ApplicationType.Portable,
                 AncmVersion = AncmVersion.AspNetCoreModuleV2,
                 HostingModel = HostingModel.InProcess,
-                AdditionalPublishParameters = "--no-build",
                 PublishApplicationBeforeDeployment = site == "InProcessWebSite",
             };
         }

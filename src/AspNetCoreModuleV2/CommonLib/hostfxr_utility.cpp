@@ -81,9 +81,9 @@ HOSTFXR_UTILITY::GetStandaloneHostfxrParameters(
 }
 
 BOOL
-HOSTFXR_UTILITY::IsDotnetExecutable(PCWSTR pwzExecutablePath)
+HOSTFXR_UTILITY::IsDotnetExecutable(const std::experimental::filesystem::path & dotnetPath)
 {
-    auto name = fs::path(pwzExecutablePath).filename();
+    auto name = dotnetPath.filename();
     name.replace_extension("");
     return _wcsnicmp(name.c_str(), L"dotnet", 6) == 0;
 }
@@ -112,7 +112,7 @@ HOSTFXR_UTILITY::GetHostFxrParameters(
     }
 
     // Check if the absolute path is to dotnet or not.
-    if (IsDotnetExecutable(processPath.c_str()))
+    if (IsDotnetExecutable(processPath))
     {
         //
         // The processPath ends with dotnet.exe or dotnet
@@ -670,7 +670,7 @@ HOSTFXR_UTILITY::ExpandEnvironmentVariables(const std::wstring & str)
         }
     } while (expandedStr.size() != requestedSize);
 
-    // trim null character
+    // trim null character as ExpandEnvironmentStringsW returns size including null character
     expandedStr.resize(requestedSize - 1);
 
     return expandedStr;

@@ -44,7 +44,7 @@ public:
     static
     BOOL
     IsDotnetExecutable(
-        PCWSTR              pwzExecutablePath
+        _In_ const std::experimental::filesystem::path & dotnetPath
     );
 
     static
