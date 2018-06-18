@@ -10,16 +10,17 @@
 #include "inprocessapplication.h"
 #include "inprocesshandler.h"
 #include "requesthandler_config.h"
+#include "debugutil.h"
+
+DECLARE_DEBUG_PRINT_OBJECT("aspnetcorev2_inprocess.dll");
 
 BOOL                g_fGlobalInitialize = FALSE;
 BOOL                g_fProcessDetach = FALSE;
-DWORD               g_dwDebugFlags = 0;
 SRWLOCK             g_srwLockRH;
 IHttpServer *       g_pHttpServer = NULL;
 HINSTANCE           g_hWinHttpModule;
 HINSTANCE           g_hAspNetCoreModule;
 HANDLE              g_hEventLog = NULL;
-PCSTR               g_szDebugLabel = "ASPNET_CORE_MODULE_INPROCESS_REQUEST_HANDLER";
 
 VOID
 InitializeGlobalConfiguration(

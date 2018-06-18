@@ -9,6 +9,9 @@
 #include "globalmodule.h"
 #include "acache.h"
 #include "utility.h"
+#include "debugutil.h"
+
+DECLARE_DEBUG_PRINT_OBJECT("aspnetcore.dll");
 
 HTTP_MODULE_ID      g_pModuleId = NULL;
 IHttpServer *       g_pHttpServer = NULL;
@@ -22,8 +25,6 @@ BOOL                g_fAspnetcoreRHLoadedError = FALSE;
 BOOL                g_fInShutdown = FALSE;
 DWORD               g_dwActiveServerProcesses = 0;
 SRWLOCK             g_srwLock;
-DWORD               g_dwDebugFlags = 0;
-PCSTR               g_szDebugLabel = "ASPNET_CORE_MODULE";
 PFN_ASPNETCORE_CREATE_APPLICATION      g_pfnAspNetCoreCreateApplication;
 
 VOID
@@ -98,13 +99,6 @@ HRESULT
     APPLICATION_MANAGER *               pApplicationManager = NULL;
 
     UNREFERENCED_PARAMETER(dwServerVersion);
-
-#ifdef DEBUG
-    CREATE_DEBUG_PRINT_OBJECT("Asp.Net Core Module");
-    g_dwDebugFlags = DEBUG_FLAGS_ANY;
-#endif // DEBUG
-
-    CREATE_DEBUG_PRINT_OBJECT;
 
     //LoadGlobalConfiguration();
 

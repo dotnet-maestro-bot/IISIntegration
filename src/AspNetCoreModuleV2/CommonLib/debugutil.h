@@ -2,11 +2,13 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 #pragma once
-#define ASPNETCORE_DEBUG_FLAG_INFO          0x00000001
-#define ASPNETCORE_DEBUG_FLAG_WARNING       0x00000002
-#define ASPNETCORE_DEBUG_FLAG_ERROR         0x00000004
+#include "stdafx.h"
+#include "dbgutil.h"
 
-static DWORD g_dwAspNetCoreDebugFlags;
+#define ASPNETCORE_DEBUG_FLAG_INFO          DEBUG_FLAG_INFO
+#define ASPNETCORE_DEBUG_FLAG_WARNING       DEBUG_FLAG_WARN
+#define ASPNETCORE_DEBUG_FLAG_ERROR         DEBUG_FLAG_ERROR
+#define ASPNETCORE_DEBUG_FLAG_CONSOLE       0x00000008
 
 static
 inline
@@ -34,19 +36,41 @@ DebugInitialize()
             &cbData) == NO_ERROR) &&
             (dwType == REG_DWORD))
         {
-            g_dwAspNetCoreDebugFlags = dwData;
+            DEBUG_FLAGS_VAR = dwData;
         }
+
         RegCloseKey(hKey);
+    }
+
+    // We expect single digit value and a null char
+    const size_t environmentVariableValueSize = 2;
+    std::wstring environmentVariableValue(environmentVariableValueSize, '\0');
+
+    if (GetEnvironmentVariable(L"ASPNETCORE_MODULE_DEBUG", environmentVariableValue.data(), environmentVariableValueSize) == environmentVariableValueSize - 1)
+    {
+        try
+        {
+            const auto value = std::stoi(environmentVariableValue);
+
+            if (value >= 1) DEBUG_FLAGS_VAR |= ASPNETCORE_DEBUG_FLAG_ERROR;
+            if (value >= 2) DEBUG_FLAGS_VAR |= ASPNETCORE_DEBUG_FLAG_WARNING;
+            if (value >= 3) DEBUG_FLAGS_VAR |= ASPNETCORE_DEBUG_FLAG_INFO;
+            if (value >= 4) DEBUG_FLAGS_VAR |= ASPNETCORE_DEBUG_FLAG_CONSOLE;
+        }
+        catch (...)
+        {
+            // ignore
+        }
     }
 }
 
 static
 BOOL
-IfDebug(
+IsEnabled(
     DWORD   dwFlag
     )
 {
-    return ( dwFlag & g_dwAspNetCoreDebugFlags );
+    return ( dwFlag & DEBUG_FLAGS_VAR );
 }
 
 static
@@ -59,23 +83,24 @@ DebugPrint(
     STACK_STRA (strOutput, 256);
     HRESULT  hr = S_OK;
 
-    if ( IfDebug( dwFlag ) )
+    if ( IsEnabled( dwFlag ) )
     {
         hr = strOutput.SafeSnprintf(
-            "[aspnetcore.dll] %s\r\n",
-            szString );
+            "[%s] %s\r\n",
+            DEBUG_LABEL_VAR, szString );
 
         if (FAILED (hr))
         {
-            goto Finished;
+            return;
         }
 
         OutputDebugStringA( strOutput.QueryStr() );
+
+        if (IsEnabled(ASPNETCORE_DEBUG_FLAG_CONSOLE))
+        {
+            fputs(strOutput.QueryStr(), stdout);
+        }
     }
-
-Finished:
-
-    return;
 }
 
 static
@@ -91,7 +116,7 @@ LPCSTR  szFormat,
     va_list  args;
     HRESULT hr = S_OK;
 
-    if ( IfDebug( dwFlag ) )
+    if ( IsEnabled( dwFlag ) )
     {
         va_start( args, szFormat );
 
@@ -101,13 +126,10 @@ LPCSTR  szFormat,
 
         if (FAILED (hr))
         {
-            goto Finished;
+            return;
         }
 
         DebugPrint( dwFlag, strCooked.QueryStr() );
     }
-
-Finished:
-    return;
 }
 
