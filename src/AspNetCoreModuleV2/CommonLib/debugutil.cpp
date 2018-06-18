@@ -126,3 +126,38 @@ DebugPrintf(
         DebugPrint( dwFlag, strCooked.QueryStr() );
     }
 }
+
+VOID
+WDebugPrintf(
+    DWORD   dwFlag,
+    LPWSTR  szFormat,
+    ...
+    )
+{
+    va_list  args;
+    HRESULT hr = S_OK;
+
+    if ( IsEnabled( dwFlag ) )
+    {
+        STACK_STRU (formatted,256);
+
+        va_start( args, szFormat );
+
+        hr = formatted.SafeVsnwprintf(szFormat, args );
+
+        va_end( args );
+
+        if (FAILED (hr))
+        {
+            return;
+        }
+
+        STACK_STRA (converted, 256);
+        if (FAILED ( converted.CopyW(formatted.QueryStr(), formatted.QueryCCH()) ))
+        {
+            return;
+        }
+
+        DebugPrint( dwFlag, converted.QueryStr() );
+    }
+}

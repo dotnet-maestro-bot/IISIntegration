@@ -29,3 +29,10 @@ DebugPrintf(
     LPCSTR  szFormat,
     ...
     );
+
+VOID
+WDebugPrintf(
+    DWORD   dwFlag,
+    LPWSTR  szFormat,
+    ...
+    );

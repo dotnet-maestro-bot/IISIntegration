@@ -333,10 +333,7 @@ APPLICATION_INFO::FindRequestHandlerAssembly(STRU& location)
                 }
             }
 
-            STRA struFileNameA;
-            // we are fine with this failing
-            struFileNameA.CopyW(struFileName.QueryStr());
-            DebugPrintf(ASPNETCORE_DEBUG_FLAG_INFO, "Loading request handler: %s", struFileNameA.QueryStr());
+            WDebugPrintf(ASPNETCORE_DEBUG_FLAG_INFO, L"Loading request handler: %s", struFileName.QueryStr());
 
             g_hAspnetCoreRH = LoadLibraryW(struFileName.QueryStr());
 
