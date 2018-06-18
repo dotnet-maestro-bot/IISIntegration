@@ -6,6 +6,7 @@
 #include "proxymodule.h"
 #include "hostfxr_utility.h"
 #include "utility.h"
+#include "debugutil.h"
 
 const PCWSTR APPLICATION_INFO::s_pwzAspnetcoreInProcessRequestHandlerName = L"aspnetcorev2_inprocess.dll";
 const PCWSTR APPLICATION_INFO::s_pwzAspnetcoreOutOfProcessRequestHandlerName = L"aspnetcorev2_outofprocess.dll";
@@ -332,6 +333,11 @@ APPLICATION_INFO::FindRequestHandlerAssembly(STRU& location)
                 }
             }
 
+            STRA struFileNameA;
+            // we are fine with this failing
+            struFileNameA.CopyW(struFileName.QueryStr());
+            DebugPrintf(ASPNETCORE_DEBUG_FLAG_INFO, "Loading request handler: %s", struFileNameA.QueryStr());
+
             g_hAspnetCoreRH = LoadLibraryW(struFileName.QueryStr());
 
             if (g_hAspnetCoreRH == NULL)
@@ -406,7 +412,7 @@ APPLICATION_INFO::FindNativeAssemblyFromGlobalLocation(
                 ASPNETCORE_EVENT_OUT_OF_PROCESS_RH_MISSING,
                 struEvent.QueryStr());
         }
-       
+
         hr = E_FAIL;
     }
     catch (...)
