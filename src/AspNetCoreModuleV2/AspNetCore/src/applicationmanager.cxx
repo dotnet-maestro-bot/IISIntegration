@@ -22,7 +22,6 @@ APPLICATION_MANAGER::GetOrCreateApplicationInfo(
 {
     HRESULT                 hr = S_OK;
     APPLICATION_INFO       *pApplicationInfo = NULL;
-    BOOL                    fExclusiveLock = FALSE;
     BOOL                    fMixedHostingModelError = FALSE;
     BOOL                    fDuplicatedInProcessApp = FALSE;
     PCWSTR                  pszApplicationId = NULL;
@@ -39,7 +38,7 @@ APPLICATION_MANAGER::GetOrCreateApplicationInfo(
     // The configuration path is unique for each application and is used for the
     // key in the applicationInfoHash.
     pszApplicationId = pHttpContext->GetApplication()->GetApplicationId();
-    
+
     // When accessing the m_pApplicationInfoHash, we need to acquire the application manager
     // lock to avoid races on setting state.
     AcquireSRWLockShared(&m_srwLock);
@@ -68,8 +67,8 @@ APPLICATION_MANAGER::GetOrCreateApplicationInfo(
             goto Finished;
         }
 
-        AcquireSRWLockExclusive(&m_srwLock);
-        fExclusiveLock = TRUE;
+        SRWExclusiveLock lockWrapper(m_srwLock);
+
         if (g_fInShutdown)
         {
             // Already in shuting down. No need to create the application
@@ -122,11 +121,6 @@ APPLICATION_MANAGER::GetOrCreateApplicationInfo(
 
 Finished:
 
-    if (fExclusiveLock)
-    {
-        ReleaseSRWLockExclusive(&m_srwLock);
-    }
-
     // log the error
     if (fDuplicatedInProcessApp)
     {
@@ -135,7 +129,7 @@ Finished:
             ASPNETCORE_EVENT_DUPLICATED_INPROCESS_APP,
             ASPNETCORE_EVENT_DUPLICATED_INPROCESS_APP_MSG,
             pszApplicationId);
-        
+
     }
     else if (fMixedHostingModelError)
     {
@@ -364,16 +358,15 @@ APPLICATION_MANAGER::ShutDown()
         }
 
         DBG_ASSERT(m_pApplicationInfoHash);
+
         // During shutdown we lock until we delete the application
-        AcquireSRWLockExclusive(&m_srwLock);
+        SRWExclusiveLock lockWrapper(m_srwLock);
 
         // Call shutdown on each application in the application manager
         m_pApplicationInfoHash->Apply(ShutdownApplication, NULL);
         m_pApplicationInfoHash->Clear();
         delete m_pApplicationInfoHash;
         m_pApplicationInfoHash = NULL;
-
-        ReleaseSRWLockExclusive(&m_srwLock);
     }
 }
 
