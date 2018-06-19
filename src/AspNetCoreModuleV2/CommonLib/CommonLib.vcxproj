@@ -201,6 +201,7 @@
     <ClInclude Include="requesthandler.h" />
     <ClInclude Include="resources.h" />
     <ClInclude Include="SRWExclusiveLock.h" />
+    <ClInclude Include="SRWSharedLock.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="sttimer.h" />
     <ClInclude Include="utility.h" />
@@ -212,6 +213,7 @@
     <ClCompile Include="hostfxr_utility.cpp" />
     <ClCompile Include="hostfxroptions.cpp" />
     <ClCompile Include="SRWExclusiveLock.cpp" />
+    <ClCompile Include="SRWSharedLock.cpp" />
     <ClCompile Include="utility.cxx" />
   </ItemGroup>
   <ItemGroup>

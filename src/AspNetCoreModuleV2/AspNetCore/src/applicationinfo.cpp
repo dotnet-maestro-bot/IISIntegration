@@ -204,7 +204,11 @@ APPLICATION_INFO::EnsureApplicationCreated(
 
     if (m_pApplication == NULL)
     {
-        SRWExclusiveLock lockWrapper(m_srwLock);
+        SRWExclusiveLock lock(m_srwLock);
+        if (m_pApplication != NULL)
+        {
+            goto Finished;
+        }
 
         //
         // in case of app offline, we don't want to create a new application now
@@ -254,7 +258,7 @@ APPLICATION_INFO::FindRequestHandlerAssembly(STRU& location)
     }
     else if (!g_fAspnetcoreRHAssemblyLoaded)
     {
-        SRWExclusiveLock lockWrapper(g_srwLock);
+        SRWExclusiveLock lock(g_srwLock);
 
         if (g_fAspnetcoreRHLoadedError)
         {
@@ -550,7 +554,7 @@ APPLICATION_INFO::RecycleApplication()
 
     if (m_pApplication != NULL)
     {
-        SRWExclusiveLock lockWrapper(m_srwLock);
+        SRWExclusiveLock lock(m_srwLock);
 
         if (m_pApplication != NULL)
         {
@@ -637,7 +641,7 @@ APPLICATION_INFO::ShutDownApplication()
     // pApplication can be NULL due to app_offline
     if (m_pApplication != NULL)
     {
-        SRWExclusiveLock lockWrapper(m_srwLock);
+        SRWExclusiveLock lock(m_srwLock);
 
         if (m_pApplication != NULL)
         {
