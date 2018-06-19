@@ -1,13 +1,14 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+#include "precomp.hxx"
+
 #include "proxymodule.h"
 
 #include "applicationmanager.h"
 #include "applicationinfo.h"
 #include "acache.h"
 #include "exceptions.h"
-
 __override
 HRESULT
 ASPNET_CORE_PROXY_MODULE_FACTORY::GetHttpModule(

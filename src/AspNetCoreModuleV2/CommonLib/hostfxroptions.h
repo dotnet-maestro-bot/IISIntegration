@@ -5,6 +5,8 @@
 
 #include <memory>
 
+#include "stringu.h"
+
 class HOSTFXR_OPTIONS
 {
 public:

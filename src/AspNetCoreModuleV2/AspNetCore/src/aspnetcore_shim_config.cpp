@@ -1,11 +1,12 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+#include "precomp.hxx"
+
 #include "aspnetcore_shim_config.h"
 
 #include "config_utility.h"
 #include "hostfxr_utility.h"
-#include "debugutil.h"
 #include "ahutil.h"
 
 ASPNETCORE_SHIM_CONFIG::~ASPNETCORE_SHIM_CONFIG()
