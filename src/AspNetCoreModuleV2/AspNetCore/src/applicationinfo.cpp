@@ -1,14 +1,15 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-#include "precomp.hxx"
-
 #include "applicationinfo.h"
 
 #include "proxymodule.h"
 #include "hostfxr_utility.h"
 #include "utility.h"
 #include "debugutil.h"
+#include "resources.h"
+#include "SRWExclusiveLock.h"
+#include "GlobalVersionUtility.h"
 
 const PCWSTR APPLICATION_INFO::s_pwzAspnetcoreInProcessRequestHandlerName = L"aspnetcorev2_inprocess.dll";
 const PCWSTR APPLICATION_INFO::s_pwzAspnetcoreOutOfProcessRequestHandlerName = L"aspnetcorev2_outofprocess.dll";

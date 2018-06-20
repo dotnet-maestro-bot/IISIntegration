@@ -1,8 +1,6 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-#include "precomp.hxx"
-
 #include "globalmodule.h"
 
 ASPNET_CORE_GLOBAL_MODULE::ASPNET_CORE_GLOBAL_MODULE(
