@@ -43,10 +43,12 @@ public:
 
             strHandlerName.Reset();
             strHandlerValue.Reset();
-            RETURN_IF_FAILED(hr = FindFirstElement(pHandlerSettingsCollection, &index, &pHandlerVar));
+            pHandlerVar.Release();
+
+            RETURN_IF_FAILED(hr = FindNextElement(pHandlerSettingsCollection, &index, &pHandlerVar));
         }
 
-        return hr;
+        return S_OK;
     }
 };
 
