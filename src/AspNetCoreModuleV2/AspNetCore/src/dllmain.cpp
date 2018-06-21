@@ -36,6 +36,8 @@ StaticCleanup()
         DeregisterEventSource(g_hEventLog);
         g_hEventLog = NULL;
     }
+
+    DebugStop();
 }
 
 BOOL WINAPI DllMain(HMODULE hModule,
