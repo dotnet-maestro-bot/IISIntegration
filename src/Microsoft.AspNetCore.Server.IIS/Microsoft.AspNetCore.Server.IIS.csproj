@@ -21,7 +21,7 @@
 
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Core" Version="$(MicrosoftAspNetCoreAuthenticationCorePackageVersion)" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="$(MicrosoftAspNetCoreHostingAbstractionsPackageVersion)" />
-    <Content Include="$(PackageId).targets" PackagePath="build/$(TargetFramework)/" />
+    <Content Include="$(PackageId).targets" PackagePath="%(Identity)" />
   </ItemGroup>
 
   <ItemGroup Condition="$(PackNativeAssets) == 'true'">

@@ -3,7 +3,7 @@
     Capability that enables Visual Studio support for hosting Asp.Net Core applications in the IIS process
   -->
   <ItemGroup>
-    <ProjectCapability Include="AspNetCoreInProcessHosting">
+    <ProjectCapability Include="AspNetCoreInProcessHosting" />
   </ItemGroup>
 
   <PropertyGroup>
