@@ -3,12 +3,6 @@
 
 #include "stdafx.h"
 
-void
-Helpers::DeleteDirectory(std::wstring directory)
-{
-    std::experimental::filesystem::remove_all(directory);
-}
-
 std::wstring
 Helpers::ReadFileContent(std::wstring file)
 {
@@ -20,12 +14,9 @@ Helpers::ReadFileContent(std::wstring file)
 
     int nChars = MultiByteToWideChar(CP_ACP,  0, buffer.str().c_str(), -1, NULL, 0);
 
-    LPWSTR pwzName = new WCHAR[nChars];
-    MultiByteToWideChar(CP_UTF8, 0, buffer.str().c_str(), -1, pwzName, nChars);
+    std::wstring retVal(nChars, '\0');
 
-    std::wstring retVal(pwzName);
-
-    delete pwzName;
+    MultiByteToWideChar(CP_UTF8, 0, buffer.str().c_str(), -1, retVal.data(), nChars);
 
     return retVal;
 }

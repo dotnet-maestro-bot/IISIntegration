@@ -6,10 +6,6 @@ class Helpers
 {
 public:
     static
-        void
-        DeleteDirectory(std::wstring directory);
-
-    static
         std::wstring
         ReadFileContent(std::wstring file);
 };
