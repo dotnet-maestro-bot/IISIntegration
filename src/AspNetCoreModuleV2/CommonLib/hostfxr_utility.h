@@ -96,7 +96,5 @@ public:
 
     static
     std::wstring ExpandEnvironmentVariables(const std::wstring & str);
-
-    static const DWORD m_WhereExeProcessTimeoutMS = 10 * 1000;
 };
 
