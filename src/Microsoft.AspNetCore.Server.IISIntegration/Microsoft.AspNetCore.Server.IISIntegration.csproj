@@ -26,4 +26,5 @@
     <PackageReference Include="Microsoft.Extensions.SecurityHelper.Sources" PrivateAssets="All" Version="$(MicrosoftExtensionsSecurityHelperSourcesPackageVersion)" />
     <Content Include="$(PackageId).targets" PackagePath="build/$(TargetFramework)/" />
   </ItemGroup>
+  
 </Project>
