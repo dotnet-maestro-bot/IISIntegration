@@ -498,7 +498,7 @@ HOSTFXR_UTILITY::InvokeWhereToFindDotnet()
     hThread = processInformation.hThread;
 
     // Wait for where.exe to return, waiting 2 seconds.
-    if (LOG_LAST_ERROR_IF(WaitForSingleObject(processInformation.hProcess, 2000) != WAIT_OBJECT_0))
+    if (LOG_LAST_ERROR_IF(WaitForSingleObject(processInformation.hProcess, m_WhereExeProcessTimeoutMS) != WAIT_OBJECT_0))
     {
         // Timeout occured, terminate the where.exe process and return.
         FINISHED_LAST_ERROR_IF(!TerminateProcess(processInformation.hProcess, 2));
