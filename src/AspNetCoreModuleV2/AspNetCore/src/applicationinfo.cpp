@@ -11,18 +11,13 @@
 #include "SRWExclusiveLock.h"
 #include "GlobalVersionUtility.h"
 #include "exceptions.h"
+#include <EventLog.h>
 
 const PCWSTR APPLICATION_INFO::s_pwzAspnetcoreInProcessRequestHandlerName = L"aspnetcorev2_inprocess.dll";
 const PCWSTR APPLICATION_INFO::s_pwzAspnetcoreOutOfProcessRequestHandlerName = L"aspnetcorev2_outofprocess.dll";
 
 APPLICATION_INFO::~APPLICATION_INFO()
 {
-    if (m_pAppOfflineHtm != NULL)
-    {
-        m_pAppOfflineHtm->DereferenceAppOfflineHtm();
-        m_pAppOfflineHtm = NULL;
-    }
-
     if (m_pFileWatcherEntry != NULL)
     {
         // Mark the entry as invalid,
@@ -98,10 +93,7 @@ APPLICATION_INFO::UpdateAppOfflineFileHandle()
     UTILITY::ConvertPathToFullPath(L".\\app_offline.htm",
         m_pConfiguration->QueryApplicationPhysicalPath()->QueryStr(),
         &strFilePath);
-    APP_OFFLINE_HTM *pOldAppOfflineHtm = NULL;
-    APP_OFFLINE_HTM *pNewAppOfflineHtm = NULL;
-
-    ReferenceApplicationInfo();
+        ReferenceApplicationInfo();
 
     if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(strFilePath.QueryStr()))
     {
@@ -119,29 +111,16 @@ APPLICATION_INFO::UpdateAppOfflineFileHandle()
     }
     else
     {
-        pNewAppOfflineHtm = new APP_OFFLINE_HTM(strFilePath.QueryStr());
+        SRWSharedLock lock(m_srwLock);
 
-        if (pNewAppOfflineHtm != NULL)
+        auto pNewAppOfflineHtm = std::make_unique<APP_OFFLINE_HTM>(strFilePath.QueryStr());
+
+        if (pNewAppOfflineHtm->Load())
         {
-            if (pNewAppOfflineHtm->Load())
-            {
-                //
-                // loaded the new app_offline.htm
-                //
-                pOldAppOfflineHtm = (APP_OFFLINE_HTM *)InterlockedExchangePointer((VOID**)&m_pAppOfflineHtm, pNewAppOfflineHtm);
-
-                if (pOldAppOfflineHtm != NULL)
-                {
-                    pOldAppOfflineHtm->DereferenceAppOfflineHtm();
-                    pOldAppOfflineHtm = NULL;
-                }
-            }
-            else
-            {
-                // ignored the new app_offline file because the file does not exist.
-                pNewAppOfflineHtm->DereferenceAppOfflineHtm();
-                pNewAppOfflineHtm = NULL;
-            }
+            //
+            // loaded the new app_offline.htm
+            //
+            m_pAppOfflineHtm.swap(pNewAppOfflineHtm);
         }
 
         m_fAppOfflineFound = TRUE;
@@ -149,16 +128,7 @@ APPLICATION_INFO::UpdateAppOfflineFileHandle()
         // recycle the application
         if (m_pApplication != NULL)
         {
-            STACK_STRU(strEventMsg, 256);
-            if (SUCCEEDED(strEventMsg.SafeSnwprintf(
-                ASPNETCORE_EVENT_RECYCLE_APPOFFLINE_MSG,
-                m_pConfiguration->QueryApplicationPath()->QueryStr())))
-            {
-                UTILITY::LogEvent(g_hEventLog,
-                    EVENTLOG_INFORMATION_TYPE,
-                    ASPNETCORE_EVENT_RECYCLE_APPOFFLINE,
-                    strEventMsg.QueryStr());
-            }
+            EVENTLOG(g_hEventLog, RECYCLE_APPOFFLINE, m_pConfiguration->QueryApplicationPath()->QueryStr());
 
             RecycleApplication();
         }

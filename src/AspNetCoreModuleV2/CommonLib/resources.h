@@ -32,6 +32,7 @@
 #define ASPNETCORE_EVENT_INPROCESS_THREAD_EXIT_STDOUT_MSG    L"Application '%s' with physical root '%s' hit unexpected managed background thread exit, ErrorCode = '0x%x. Last 4KB characters of captured stdout and stderr logs:\r\n%s"
 #define ASPNETCORE_EVENT_INPROCESS_THREAD_EXIT_MSG           L"Application '%s' with physical root '%s' hit unexpected managed background thread exit, ErrorCode = '0x%x. Please check the stderr logs for more information."
 #define ASPNETCORE_EVENT_APP_IN_SHUTDOWN_MSG                 L"Application shutting down."
+#define ASPNETCORE_EVENT_RECYCLE_APPOFFLINE_LEVEL            EVENTLOG_INFORMATION_TYPE
 #define ASPNETCORE_EVENT_RECYCLE_APPOFFLINE_MSG              L"Application '%s' was recycled after detecting the app_offline file."
 #define ASPNETCORE_EVENT_RECYCLE_APPOFFLINE_REMOVED_MSG      L"App_offline.htm has been removed from the application. Application will be recycled."
 #define ASPNETCORE_EVENT_RECYCLE_CONFIGURATION_MSG           L"Application '%s' was recycled due to configuration change"

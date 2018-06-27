@@ -38,9 +38,10 @@ public:
         m_fAppOfflineFound(FALSE),
         m_fValid(FALSE),
         m_fDoneAppCreation(FALSE),
-        m_pAppOfflineHtm(NULL),
+        m_pAppOfflineHtm(nullptr),
         m_pFileWatcherEntry(NULL),
         m_pConfiguration(NULL),
+        m_pApplication(NULL),
         m_pfnAspNetCoreCreateApplication(NULL)
     {
         InitializeSRWLock(&m_srwLock);
@@ -80,7 +81,9 @@ public:
     APP_OFFLINE_HTM*
     QueryAppOfflineHtm()
     {
-        return m_pAppOfflineHtm;
+        SRWSharedLock lock(m_srwLock);
+
+        return m_pAppOfflineHtm.get();
     }
 
     BOOL
@@ -153,7 +156,7 @@ private:
     BOOL                    m_fAppOfflineFound;
     BOOL                    m_fValid;
     BOOL                    m_fDoneAppCreation;
-    APP_OFFLINE_HTM        *m_pAppOfflineHtm;
+    std::unique_ptr<APP_OFFLINE_HTM> m_pAppOfflineHtm;
     FILE_WATCHER_ENTRY     *m_pFileWatcherEntry;
     ASPNETCORE_SHIM_CONFIG *m_pConfiguration;
     IAPPLICATION           *m_pApplication;
