@@ -52,6 +52,7 @@ BOOL WINAPI DllMain(HMODULE hModule,
     case DLL_PROCESS_ATTACH:
         g_hModule = hModule;
         DisableThreadLibraryCalls(hModule);
+        DebugInitialize();
         break;
     case DLL_PROCESS_DETACH:
         // IIS can cause dll detach to occur before we receive global notifications
@@ -142,8 +143,6 @@ HRESULT
 
         RegCloseKey(hKey);
     }
-
-    DebugInitialize();
 
     if (fDisableANCM)
     {
