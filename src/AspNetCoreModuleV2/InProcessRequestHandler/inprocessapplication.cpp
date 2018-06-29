@@ -13,6 +13,8 @@
 #include "exceptions.h"
 #include "LoggingHelpers.h"
 
+const LPCSTR IN_PROCESS_APPLICATION::s_exeLocationParameterName = "InProcessExeLocation";
+
 IN_PROCESS_APPLICATION*  IN_PROCESS_APPLICATION::s_Application = NULL;
 
 IN_PROCESS_APPLICATION::IN_PROCESS_APPLICATION(
@@ -34,10 +36,9 @@ IN_PROCESS_APPLICATION::IN_PROCESS_APPLICATION(
     DBG_ASSERT(pHttpServer != NULL);
     DBG_ASSERT(pConfig != NULL);
 
-    const auto exeLocationParameterName = "InProcessExeLocation";
     for (DWORD i = 0; i < nParameters; i++)
     {
-        if (_stricmp(pParameters[i].pzName, exeLocationParameterName) == 0)
+        if (_stricmp(pParameters[i].pzName, s_exeLocationParameterName) == 0)
         {
             m_struExeLocation.Copy(reinterpret_cast<PCWSTR>(pParameters[i].pValue));
         }

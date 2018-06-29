@@ -151,7 +151,7 @@ private:
     IOutputManager*                 m_pLoggerProvider;
     std::unique_ptr<REQUESTHANDLER_CONFIG>          m_pConfig;
 
-
+    static const LPCSTR             s_exeLocationParameterName;
 
     static
     VOID
