@@ -57,17 +57,17 @@ private:
     mutable LONG                    m_cRefs;
 };
 
-class AppOfflineApplication: public APPLICATION
+class AppOfflineTrackingApplication: public APPLICATION
 {
 public:
-    AppOfflineApplication(const IHttpApplication& application)
+    AppOfflineTrackingApplication(const IHttpApplication& application)
         : m_applicationPath(application.GetApplicationPhysicalPath()),
         m_fileWatcher(nullptr),
         m_fileWatcherEntry(nullptr)
     {
     }
 
-    ~AppOfflineApplication() override = default;
+    ~AppOfflineTrackingApplication() override = default;
     
     HRESULT
     StartMonitoringAppOffline()

@@ -9,7 +9,7 @@ hostfxr_main_fn InProcessApplicationBase::s_fMainCallback = NULL;
 InProcessApplicationBase::InProcessApplicationBase(
     IHttpServer& pHttpServer,
     IHttpApplication& pHttpApplication)
-    : AppOfflineApplication(pHttpApplication),
+    : AppOfflineTrackingApplication(pHttpApplication),
       m_fRecycleCalled(FALSE),
       m_srwLock(),
       m_pHttpServer(pHttpServer)

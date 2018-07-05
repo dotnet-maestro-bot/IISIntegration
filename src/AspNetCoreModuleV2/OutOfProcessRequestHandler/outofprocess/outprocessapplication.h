@@ -3,7 +3,7 @@
 
 #pragma once
 
-class OUT_OF_PROCESS_APPLICATION : public AppOfflineApplication
+class OUT_OF_PROCESS_APPLICATION : public AppOfflineTrackingApplication
 {
     enum WEBSOCKET_STATUS
     {
