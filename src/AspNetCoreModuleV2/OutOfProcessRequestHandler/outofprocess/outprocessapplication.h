@@ -3,7 +3,7 @@
 
 #pragma once
 
-class OUT_OF_PROCESS_APPLICATION : public APPLICATION
+class OUT_OF_PROCESS_APPLICATION : public AppOfflineApplication
 {
     enum WEBSOCKET_STATUS
     {
@@ -14,7 +14,8 @@ class OUT_OF_PROCESS_APPLICATION : public APPLICATION
 
 public:
     OUT_OF_PROCESS_APPLICATION(
-        std::shared_ptr<REQUESTHANDLER_CONFIG> pConfig);
+        IHttpApplication& pApplication,
+        std::unique_ptr<REQUESTHANDLER_CONFIG> pConfig);
 
     __override
     ~OUT_OF_PROCESS_APPLICATION() override;
@@ -48,6 +49,11 @@ public:
     QueryWebsocketStatus()
     const;
 
+    REQUESTHANDLER_CONFIG* QueryConfig()
+    {
+        return m_pConfig.get();
+    }
+
 private:
 
     VOID SetWebsocketStatus(IHttpContext *pHttpContext);
@@ -57,4 +63,5 @@ private:
     IHttpServer      *m_pHttpServer;
 
     WEBSOCKET_STATUS              m_fWebSocketSupported;
+    std::unique_ptr<REQUESTHANDLER_CONFIG> m_pConfig;
 };

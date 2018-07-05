@@ -302,56 +302,22 @@ CreateApplication(
 {
     UNREFERENCED_PARAMETER(pParameters);
     UNREFERENCED_PARAMETER(nParameters);
-    HRESULT      hr = S_OK;
-    APPLICATION *pApplication = NULL;
+    
     REQUESTHANDLER_CONFIG *pConfig = NULL;
 
     // Initialze some global variables here
     InitializeGlobalConfiguration(pServer);
 
-    hr = REQUESTHANDLER_CONFIG::CreateRequestHandlerConfig(pServer, pHttpApplication, &pConfig);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
+    RETURN_IF_FAILED(REQUESTHANDLER_CONFIG::CreateRequestHandlerConfig(pServer, pHttpApplication, &pConfig));
+    std::unique_ptr<REQUESTHANDLER_CONFIG> pSharedConfig(pConfig);
 
-    std::shared_ptr<REQUESTHANDLER_CONFIG> pSharedConfig(pConfig);
+    RETURN_IF_FAILED(EnsureOutOfProcessInitializtion());
 
-    hr = EnsureOutOfProcessInitializtion();
-    if (FAILED(hr))
-    {
-        goto Finished;
-    }
+    std::unique_ptr<OUT_OF_PROCESS_APPLICATION> pApplication = std::make_unique<OUT_OF_PROCESS_APPLICATION>(*pHttpApplication, std::move(pSharedConfig));
 
-    pApplication = new OUT_OF_PROCESS_APPLICATION(pSharedConfig);
-    if (pApplication == NULL)
-    {
-        hr = HRESULT_FROM_WIN32(ERROR_OUTOFMEMORY);
-        goto Finished;
-    }
-    pConfig = NULL;
+    RETURN_IF_FAILED(pApplication->Initialize());
+    RETURN_IF_FAILED(pApplication->StartMonitoringAppOffline());
 
-    hr = ((OUT_OF_PROCESS_APPLICATION*)pApplication)->Initialize();
-    if (FAILED(hr))
-    {
-        goto Finished;
-    }
-
-    hr = pApplication->StartMonitoringAppOffline();
-    if (FAILED(hr))
-    {
-        goto Finished;
-    }
-
-    *ppApplication = pApplication;
-    pApplication = NULL;
-
-
-Finished:
-    if (pApplication != NULL)
-    {
-        delete pApplication;
-    }
-
-    return hr;
+    *ppApplication = pApplication.release();
+    return S_OK;
 }

@@ -117,3 +117,12 @@ private:
     BOOL                    _fIsValid;
     SRWLOCK                 _srwLock;
 };
+
+
+struct FILE_WATCHER_ENTRY_DELETER
+{
+    void operator()(FILE_WATCHER_ENTRY* entry) const
+    {
+        entry->DereferenceFileWatcherEntry();
+    }
+};

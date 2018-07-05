@@ -11,10 +11,13 @@
 class StartupExceptionApplication : public InProcessApplicationBase
 {
 public:
-    StartupExceptionApplication(IHttpServer* pServer, std::shared_ptr<REQUESTHANDLER_CONFIG> pConfig, BOOL disableLogs)
+    StartupExceptionApplication(
+        IHttpServer& pServer,
+        IHttpApplication& pApplication,
+        BOOL disableLogs)
         : m_disableLogs(disableLogs),
         m_pHttpServer(pServer),
-        InProcessApplicationBase(pServer, pConfig)
+        InProcessApplicationBase(pServer, pApplication)
     {
         InitializeSRWLock(&m_srwLock);
         m_status = APPLICATION_STATUS::RUNNING;
@@ -22,8 +25,8 @@ public:
 
     ~StartupExceptionApplication() = default;
 
-    virtual VOID ShutDown() override;
-    virtual HRESULT CreateHandler(IHttpContext * pHttpContext, IREQUEST_HANDLER ** pRequestHandler) override;
+    VOID ShutDown() override;
+    HRESULT CreateHandler(IHttpContext * pHttpContext, IREQUEST_HANDLER ** pRequestHandler) override;
 
     std::string&
         GetStaticHtml500Content()
@@ -65,6 +68,6 @@ private:
     std::string html500Page;
     SRWLOCK m_srwLock;
     BOOL m_disableLogs;
-    IHttpServer* m_pHttpServer;
+    IHttpServer& m_pHttpServer;
 };
 

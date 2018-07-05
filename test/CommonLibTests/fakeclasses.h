@@ -167,6 +167,16 @@ class MockHttpServer : public IHttpServer
     }
 };
 
+
+class MockHttpApplication: public IHttpApplication
+{
+public:
+    MOCK_CONST_METHOD0(GetApplicationPhysicalPath, PCWSTR ());
+    MOCK_CONST_METHOD0(GetApplicationId, PCWSTR ());
+    MOCK_CONST_METHOD0(GetAppConfigPath, PCWSTR ());
+    MOCK_METHOD0(GetModuleContextContainer, IHttpModuleContextContainer* ());
+};
+
 class MockRequestHandlerConfig : public REQUESTHANDLER_CONFIG
 {
 public:

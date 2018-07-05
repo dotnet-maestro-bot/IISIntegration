@@ -15,8 +15,9 @@ namespace InprocessTests
 {
     TEST(InProcessTest, NoNullRefForExePath)
     {
-        auto server = new MockHttpServer();
-        auto requestHandlerConfig = MockRequestHandlerConfig::CreateConfig();
+        MockHttpServer server;
+        MockHttpApplication application;
+        auto requestHandlerConfig = std::unique_ptr<REQUESTHANDLER_CONFIG>(MockRequestHandlerConfig::CreateConfig());
 
         std::wstring exePath(L"hello");
 
@@ -24,8 +25,7 @@ namespace InprocessTests
             {"InProcessExeLocation", exePath.data()}
         };
 
-        auto config = std::shared_ptr<REQUESTHANDLER_CONFIG>(requestHandlerConfig);
-        IN_PROCESS_APPLICATION *app = new IN_PROCESS_APPLICATION(server, config, parameters.data(), 1);
+        IN_PROCESS_APPLICATION *app = new IN_PROCESS_APPLICATION(server, application, std::move(requestHandlerConfig), parameters.data(), 1);
 
         ASSERT_STREQ(app->QueryExeLocation(), L"hello");
     }

@@ -1,9 +1,11 @@
 #include "..\precomp.hxx"
 
 OUT_OF_PROCESS_APPLICATION::OUT_OF_PROCESS_APPLICATION(
-    std::shared_ptr<REQUESTHANDLER_CONFIG> pConfig) :
-    APPLICATION(pConfig),
-    m_fWebSocketSupported(WEBSOCKET_STATUS::WEBSOCKET_UNKNOWN)
+    IHttpApplication& pApplication,
+    std::unique_ptr<REQUESTHANDLER_CONFIG> pConfig) :
+    AppOfflineApplication(pApplication),
+    m_fWebSocketSupported(WEBSOCKET_STATUS::WEBSOCKET_UNKNOWN),
+    m_pConfig(std::move(pConfig))
 {
     m_status = APPLICATION_STATUS::RUNNING;
     m_pProcessManager = NULL;

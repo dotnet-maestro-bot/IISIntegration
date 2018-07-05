@@ -24,7 +24,6 @@ IHttpServer *       g_pHttpServer = NULL;
 HINSTANCE           g_hWinHttpModule;
 HINSTANCE           g_hAspNetCoreModule;
 HANDLE              g_hEventLog = NULL;
-FILE_WATCHER*       g_pFileWatcher = NULL;
 
 HRESULT
 InitializeGlobalConfiguration(
@@ -40,15 +39,7 @@ InitializeGlobalConfiguration(
             g_pHttpServer = pServer;
             RETURN_IF_FAILED(ALLOC_CACHE_HANDLER::StaticInitialize());
             RETURN_IF_FAILED(IN_PROCESS_HANDLER::StaticInitialize());
-            if (g_pFileWatcher == NULL)
-            {
-                try
-                {
-                    g_pFileWatcher = new FILE_WATCHER;
-                    g_pFileWatcher->Create();
-                }
-                CATCH_RETURN();
-            }
+            
             if (pServer->IsCommandLineLaunch())
             {
                 g_hEventLog = RegisterEventSource(NULL, ASPNETCORE_IISEXPRESS_EVENT_PROVIDER);
@@ -66,16 +57,6 @@ InitializeGlobalConfiguration(
     return S_OK;
 }
 
-VOID
-CleanUp()
-{
-    if (g_pFileWatcher!= NULL)
-    {
-        delete g_pFileWatcher;
-    }
-    DebugStop();
-}
-
 BOOL APIENTRY DllMain(HMODULE hModule,
     DWORD  ul_reason_for_call,
     LPVOID lpReserved
@@ -91,7 +72,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         break;
     case DLL_PROCESS_DETACH:
         g_fProcessDetach = TRUE;
-        CleanUp();
+        DebugStop();
     default:
         break;
     }
@@ -108,26 +89,25 @@ CreateApplication(
     _Out_ IAPPLICATION          **ppApplication
 )
 {
-    REQUESTHANDLER_CONFIG  *pConfig = NULL;
 
     try
     {
-        // Initialze some global variables here
+        // Initialize some global variables here
         RETURN_IF_FAILED(InitializeGlobalConfiguration(pServer));
+        
+        REQUESTHANDLER_CONFIG *pConfig = nullptr;
         RETURN_IF_FAILED(REQUESTHANDLER_CONFIG::CreateRequestHandlerConfig(pServer, pHttpApplication, &pConfig));
-
+        std::unique_ptr<REQUESTHANDLER_CONFIG> pSharedConfig(pConfig);
+        
         BOOL disableStartupPage = pConfig->QueryDisableStartUpErrorPage();
 
-        std::shared_ptr<REQUESTHANDLER_CONFIG> pSharedConfig(pConfig);
-
-        auto pApplication = std::make_unique<IN_PROCESS_APPLICATION>(pServer, pSharedConfig, pParameters, nParameters);
+        auto pApplication = std::make_unique<IN_PROCESS_APPLICATION>(*pServer, *pHttpApplication, std::move(pSharedConfig), pParameters, nParameters);
         
-        if (FAILED(pApplication->LoadManagedApplication()))
+        if (FAILED_LOG(pApplication->LoadManagedApplication()))
         {
             // Set the currently running application to a fake application that returns startup exceptions.
-            auto pErrorApplication = std::make_unique <StartupExceptionApplication>(pServer, pSharedConfig, disableStartupPage);
-
-            // needs to increase the reference counter as the object is shared by pApplication and pErrorApplication
+            auto pErrorApplication = std::make_unique<StartupExceptionApplication>(*pServer, *pHttpApplication, disableStartupPage);
+            
             RETURN_IF_FAILED(pErrorApplication->StartMonitoringAppOffline());
             *ppApplication = pErrorApplication.release();
         }

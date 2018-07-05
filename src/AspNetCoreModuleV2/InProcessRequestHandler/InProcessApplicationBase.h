@@ -9,11 +9,13 @@
 
 typedef INT(*hostfxr_main_fn) (CONST DWORD argc, CONST PCWSTR argv[]); // TODO these may need to be BSTRs
 
-class InProcessApplicationBase : public APPLICATION
+class InProcessApplicationBase : public AppOfflineApplication
 {
 public:
 
-    InProcessApplicationBase(IHttpServer* pHttpServer, std::shared_ptr<REQUESTHANDLER_CONFIG> pConfig);
+    InProcessApplicationBase(
+        IHttpServer& pHttpServer,
+        IHttpApplication& pHttpApplication);
 
     ~InProcessApplicationBase() = default;
 
@@ -22,7 +24,7 @@ public:
 protected:
     BOOL m_fRecycleCalled;
     SRWLOCK m_srwLock;
-    IHttpServer* const m_pHttpServer;
+    IHttpServer& m_pHttpServer;
     // Allows to override call to hostfxr_main with custome callback
     // used in testing
     static hostfxr_main_fn          s_fMainCallback;

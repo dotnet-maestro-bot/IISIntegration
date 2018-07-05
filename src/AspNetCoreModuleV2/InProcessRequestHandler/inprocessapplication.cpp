@@ -18,11 +18,12 @@ const LPCSTR IN_PROCESS_APPLICATION::s_exeLocationParameterName = "InProcessExeL
 IN_PROCESS_APPLICATION*  IN_PROCESS_APPLICATION::s_Application = NULL;
 
 IN_PROCESS_APPLICATION::IN_PROCESS_APPLICATION(
-    IHttpServer *pHttpServer,
-    std::shared_ptr<REQUESTHANDLER_CONFIG> pConfig,
+    IHttpServer& pHttpServer,
+    IHttpApplication& pApplication,
+    std::unique_ptr<REQUESTHANDLER_CONFIG> pConfig,
     APPLICATION_PARAMETER *pParameters,
     DWORD                  nParameters) :
-    InProcessApplicationBase(pHttpServer, pConfig),
+    InProcessApplicationBase(pHttpServer, pApplication),
     m_pHttpServer(pHttpServer),
     m_ProcessExitCode(0),
     m_fBlockCallbacksIntoManaged(FALSE),

@@ -17,8 +17,9 @@ class IN_PROCESS_APPLICATION : public InProcessApplicationBase
 {
 public:
     IN_PROCESS_APPLICATION(
-        IHttpServer* pHttpServer,
-        std::shared_ptr<REQUESTHANDLER_CONFIG> pConfig,
+        IHttpServer& pHttpServer,
+        IHttpApplication& pApplication,
+        std::unique_ptr<REQUESTHANDLER_CONFIG> pConfig,
         APPLICATION_PARAMETER *pParameters,
         DWORD                  nParameters);
 
@@ -111,9 +112,15 @@ public:
         return m_struExeLocation.QueryStr();
     }
 
+    REQUESTHANDLER_CONFIG*
+    QueryConfig()
+    {
+        return m_pConfig.get();
+    }
+
 private:
 
-    IHttpServer * const      m_pHttpServer;
+    IHttpServer &                   m_pHttpServer;
 
     // Thread executing the .NET Core process
     HANDLE                          m_hThread;
@@ -142,7 +149,7 @@ private:
     volatile BOOL                   m_fShutdownCalledFromManaged;
     BOOL                            m_fRecycleCalled;
     BOOL                            m_fInitialized;
-
+    std::unique_ptr<REQUESTHANDLER_CONFIG> m_pConfig;
 
     static IN_PROCESS_APPLICATION*  s_Application;
 

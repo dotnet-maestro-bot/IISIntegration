@@ -3,7 +3,8 @@
 
 #pragma once
 
-#include "stdafx.h"
+#include <httpserv.h>
+
 #include "iapplication.h"
 #include "exceptions.h"
 #include "requesthandler_config.h"
@@ -12,7 +13,6 @@
 #include "..\CommonLib\resources.h"
 #include "utility.h"
 
-extern "C" FILE_WATCHER* g_pFileWatcher;
 extern "C" HANDLE        g_hEventLog;
 
 class APPLICATION : public IAPPLICATION
@@ -25,19 +25,9 @@ public:
         return m_status;
     }
 
-    APPLICATION(std::shared_ptr<REQUESTHANDLER_CONFIG> pConfig)
-        : m_cRefs(1),
-        m_pFileWatcherEntry(NULL)
+    APPLICATION()
+        : m_cRefs(1)
     {
-        m_pConfig = pConfig;
-    }
-
-    virtual ~APPLICATION() override
-    {
-        if (m_pFileWatcherEntry != NULL)
-        {
-            m_pFileWatcherEntry->DereferenceFileWatcherEntry();
-        }
     }
 
     VOID
@@ -51,74 +41,86 @@ public:
     {
         DBG_ASSERT(m_cRefs != 0);
 
-        LONG cRefs = 0;
-        if ((cRefs = InterlockedDecrement(&m_cRefs)) == 0)
+        if (InterlockedDecrement(&m_cRefs) == 0)
         {
             delete this;
         }
     }
 
+protected:
+    volatile APPLICATION_STATUS     m_status = APPLICATION_STATUS::UNKNOWN;
+private:
+    // Non-copyable
+    APPLICATION(const APPLICATION&) = delete;
+    const APPLICATION& operator=(const APPLICATION&) = delete;
+
+    mutable LONG                    m_cRefs;
+};
+
+class AppOfflineApplication: public APPLICATION
+{
+public:
+    AppOfflineApplication(const IHttpApplication& application)
+        : m_applicationPath(application.GetApplicationPhysicalPath()),
+        m_fileWatcher(nullptr),
+        m_fileWatcherEntry(nullptr)
+    {
+    }
+
+    ~AppOfflineApplication() override = default;
+    
     HRESULT
     StartMonitoringAppOffline()
     {
-        HRESULT hr = S_OK;
-        if (g_pFileWatcher == NULL)
-        {
-            hr = E_INVALIDARG;
-        }
-        else
-        {
-            if (m_pFileWatcherEntry == NULL)
-            {
-                m_pFileWatcherEntry = new  FILE_WATCHER_ENTRY(g_pFileWatcher);
-                hr = m_pFileWatcherEntry->Create(m_pConfig->QueryApplicationPhysicalPath()->QueryStr(), L"app_offline.htm", this, NULL);
-            }
-            else
-            {
-                // We never expect to resue the filewatcher entry or an application calls StartMonitoringAppOffline more than once
-                hr = E_UNEXPECTED;
-            }
-        }
+        LOG_INFOF("Starting app_offline monitoring in application %S", m_applicationPath.c_str());
+        HRESULT hr = StartMonitoringAppOflineImpl();
 
-        if(FAILED(hr))
+        if(FAILED_LOG(hr))
         {
             UTILITY::LogEventF(g_hEventLog,
                 EVENTLOG_WARNING_TYPE,
                 ASPNETCORE_EVENT_MONITOR_APPOFFLINE_ERROR,
                 ASPNETCORE_EVENT_MONITOR_APPOFFLINE_ERROR_MSG,
-                m_pConfig->QueryConfigPath()->QueryStr(),
+                m_applicationPath.c_str(),
                 hr);
         }
 
         return hr;
     }
 
+    HRESULT
+    StartMonitoringAppOflineImpl()
+    {
+        if (m_fileWatcher)
+        {
+            RETURN_IF_FAILED(E_UNEXPECTED);
+        }
+
+        m_fileWatcher = std::make_unique<FILE_WATCHER>();
+        RETURN_IF_FAILED(m_fileWatcher->Create());
+        m_fileWatcherEntry.reset(new FILE_WATCHER_ENTRY(m_fileWatcher.get()));
+        RETURN_IF_FAILED(m_fileWatcherEntry->Create(m_applicationPath.c_str(), L"app_offline.htm", this, NULL));
+
+        return S_OK;
+    }
+
     VOID
     OnAppOffline() override
     {
-        m_pFileWatcherEntry->StopMonitor();
-        m_pFileWatcherEntry = NULL;
-        m_status = APPLICATION_STATUS::OFFLINE;
+        LOG_INFOF("Received app_offline notification in application %S", m_applicationPath.c_str());
+        m_fileWatcherEntry->StopMonitor();
+        m_status = APPLICATION_STATUS::SHUTDOWN;
         UTILITY::LogEventF(g_hEventLog,
             EVENTLOG_INFORMATION_TYPE,
             ASPNETCORE_EVENT_RECYCLE_APPOFFLINE,
             ASPNETCORE_EVENT_RECYCLE_APPOFFLINE_MSG,
-            m_pConfig->QueryConfigPath()->QueryStr());
+            m_applicationPath.c_str());
+
         Recycle();
     }
 
-    REQUESTHANDLER_CONFIG*
-    QueryConfig() const
-    {
-        return m_pConfig.get();
-    }
-
-
-protected:
-    volatile APPLICATION_STATUS             m_status = APPLICATION_STATUS::UNKNOWN;
-    FILE_WATCHER_ENTRY*                     m_pFileWatcherEntry;
-    std::shared_ptr<REQUESTHANDLER_CONFIG>  m_pConfig;
-
 private:
-    mutable LONG                    m_cRefs;
+    std::wstring                                 m_applicationPath;
+    std::unique_ptr<FILE_WATCHER>                m_fileWatcher;
+    std::unique_ptr<FILE_WATCHER_ENTRY, FILE_WATCHER_ENTRY_DELETER>  m_fileWatcherEntry;
 };
