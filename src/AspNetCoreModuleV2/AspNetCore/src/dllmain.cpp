@@ -11,7 +11,7 @@
 #include "resources.h"
 #include "exceptions.h"
 
-DECLARE_DEBUG_PRINT_OBJECT("aspnetcore.dll");
+DECLARE_DEBUG_PRINT_OBJECT("aspnetcorev2.dll");
 
 HTTP_MODULE_ID      g_pModuleId = NULL;
 IHttpServer *       g_pHttpServer = NULL;
