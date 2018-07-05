@@ -13,6 +13,7 @@
 #include "GlobalVersionUtility.h"
 #include "exceptions.h"
 #include "HandleWrapper.h"
+#include "PollingAppOfflineApplication.h"
 
 const PCWSTR APPLICATION_INFO::s_pwzAspnetcoreInProcessRequestHandlerName = L"aspnetcorev2_inprocess.dll";
 const PCWSTR APPLICATION_INFO::s_pwzAspnetcoreOutOfProcessRequestHandlerName = L"aspnetcorev2_outofprocess.dll";
@@ -57,130 +58,6 @@ Finished:
     return hr;
 }
 
-BOOL
-APPLICATION_INFO::CheckIfAppOfflinePresent()
-{
-    ULONGLONG  ulCurrentTime = GetTickCount64();
-    //
-    // we only care about app offline presented. If not, it means the application has started
-    // and is monitoring  the app offline file
-    // we cache the file exist check result for 1 second
-    //
-    if (m_fAppOfflineFound && ulCurrentTime - m_ulLastCheckTime > 1000)
-    {
-        // double check to avoid expensive IO operation
-        SRWExclusiveLock lock(m_srwLock);
-        if (ulCurrentTime - m_ulLastCheckTime > 1000)
-        {
-            UpdateAppOfflineFileHandle();
-            m_ulLastCheckTime = ulCurrentTime;
-        }
-    }
-    return m_fAppOfflineFound;
-}
-
-// Load appoffline content
-BOOL APPLICATION_INFO::LoadAppOffline(LPWSTR strFilePath)
-{
-    LARGE_INTEGER   li = { 0 };
-
-    DBG_ASSERT(strFilePath);
-
-    HandleWrapper<InvalidHandleTraits> handle = CreateFile(strFilePath,
-                        GENERIC_READ,
-                        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-                        NULL,
-                        OPEN_EXISTING,
-                        FILE_ATTRIBUTE_NORMAL,
-                        NULL);
-
-    if (handle == INVALID_HANDLE_VALUE)
-    {
-        if (HRESULT_FROM_WIN32(GetLastError()) == ERROR_FILE_NOT_FOUND)
-        {
-            return FALSE;
-        }
-
-        // If file is currenlty locked exclusively by other processes, we might get INVALID_HANDLE_VALUE even though the file exists. In that case, we should return TRUE here.
-        return TRUE;
-    }
-
-    if (!GetFileSizeEx(handle, &li))
-    {
-        return TRUE;
-    }
-
-    if (li.HighPart != 0)
-    {
-        // > 4gb file size not supported
-        // todo: log a warning at event log
-        return TRUE;
-    }
-
-    if (li.LowPart > 0)
-    {
-        DWORD bytesRead = 0;
-        std::unique_ptr<char[]> pszBuff(new CHAR[li.LowPart + 1]);
-
-        if (ReadFile(handle, pszBuff.get(), li.LowPart, &bytesRead, NULL))
-        {
-            LOG_IF_FAILED(m_strAppOfflineContent.Copy(pszBuff.get(), bytesRead));
-        }
-    }
-
-    return TRUE;
-}
-
-//
-//  Check AppOffline and load content into a buffer if file exists
-//
-VOID
-APPLICATION_INFO::UpdateAppOfflineFileHandle()
-{
-    STRU strFilePath;
-    UTILITY::ConvertPathToFullPath(L".\\app_offline.htm",
-        m_pConfiguration->QueryApplicationPhysicalPath()->QueryStr(),
-        &strFilePath);
-
-    if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(strFilePath.QueryStr()))
-    {
-        m_fAppOfflineFound = FALSE;
-    }
-    else
-    {
-        // Only load the appoffline file once to avoid expensive IO
-        // If appoffline file changes during offline, we will not refresh it
-        if (!m_fAppOfflineLoaded)
-        {
-            LoadAppOffline(strFilePath.QueryStr());
-            m_fAppOfflineFound = TRUE;
-            m_fAppOfflineLoaded = TRUE;
-        }
-    }
-}
-
-VOID
-APPLICATION_INFO::ServeAppOffline(IHttpResponse* pResponse)
-{
-    // servicing app_offline
-    HTTP_DATA_CHUNK   DataChunk;
-
-    DBG_ASSERT(pResponse);
-
-    // Ignore failure hresults as nothing we can do
-    // Set fTrySkipCustomErrors to true as we want client see the offline content
-    pResponse->SetStatus(503, "Service Unavailable", 0, S_OK, NULL, TRUE);
-    pResponse->SetHeader("Content-Type",
-        "text/html",
-        (USHORT)strlen("text/html"),
-        FALSE
-    );
-
-    DataChunk.DataChunkType = HttpDataChunkFromMemory;
-    DataChunk.FromMemory.pBuffer = (PVOID)m_strAppOfflineContent.QueryStr();
-    DataChunk.FromMemory.BufferLength = m_strAppOfflineContent.QueryCB();
-    pResponse->WriteEntityChunkByReference(&DataChunk);
-}
 
 HRESULT
 APPLICATION_INFO::EnsureApplicationCreated(
@@ -193,58 +70,68 @@ APPLICATION_INFO::EnsureApplicationCreated(
     STRU                struHostFxrDllLocation;
     STACK_STRU(struFileName, 300);  // >MAX_PATH
 
-    if (m_pApplication != NULL)
+    if (m_pApplication != nullptr && m_pApplication->QueryStatus() != OFFLINE)
     {
         return S_OK;
     }
 
-    // one optimization for failure scenario is to reduce the lock scope
     SRWExclusiveLock lock(m_srwLock);
 
+    if (m_pApplication != nullptr)
     {
-        if (m_pApplication != NULL)
+        if (m_pApplication->QueryStatus() == OFFLINE)
         {
-            // another thread created the applicaiton
-            FINISHED(S_OK);
+            LOG_INFO("Application went offline");
+            m_pApplication->DereferenceApplication();
+            m_pApplication = nullptr;
         }
-        else if (m_fDoneAppCreation)
+        else
         {
-            // previous CreateApplication failed
-            FINISHED(E_APPLICATION_ACTIVATION_EXEC_FAILURE);
-        }
-
-        //
-        // in case of app offline, we don't want to create a new application now
-        //
-        if (!m_fAppOfflineFound)
-        {
-            // Move the request handler check inside of the lock
-            // such that only one request finds and loads it.
-            // FindRequestHandlerAssembly obtains a global lock, but after releasing the lock,
-            // there is a period where we could call
-
-            m_fDoneAppCreation = TRUE;
-            FINISHED_IF_FAILED(FindRequestHandlerAssembly(struExeLocation));
-
-            if (m_pfnAspNetCoreCreateApplication == NULL)
-            {
-                FINISHED(HRESULT_FROM_WIN32(ERROR_INVALID_FUNCTION));
-            }
-
-            std::array<APPLICATION_PARAMETER, 1> parameters {
-                {"InProcessExeLocation", struExeLocation.QueryStr()}
-            };
-
-            FINISHED_IF_FAILED(m_pfnAspNetCoreCreateApplication(
-                m_pServer,
-                pHttpContext->GetApplication(),
-                parameters.data(),
-                static_cast<DWORD>(parameters.size()),
-                &pApplication));
-
-            m_pApplication = pApplication;
+            // another thread created the application
+            FINISHED(S_OK);   
         }
     }
+    else if (m_fDoneAppCreation)
+    {
+        // previous CreateApplication failed
+        FINISHED(E_APPLICATION_ACTIVATION_EXEC_FAILURE);
+    }
+
+    auto& httpApplication = *pHttpContext->GetApplication();
+    if (PollingAppOfflineApplication::ShouldBeStarted(httpApplication))
+    {
+        LOG_INFO("Detected app_ofline file, creating polling application");
+        m_pApplication = new PollingAppOfflineApplication(httpApplication);
+    }
+    else
+    {
+        // Move the request handler check inside of the lock
+        // such that only one request finds and loads it.
+        // FindRequestHandlerAssembly obtains a global lock, but after releasing the lock,
+        // there is a period where we could call
+
+        m_fDoneAppCreation = TRUE;
+        FINISHED_IF_FAILED(FindRequestHandlerAssembly(struExeLocation));
+
+        if (m_pfnAspNetCoreCreateApplication == NULL)
+        {
+            FINISHED(HRESULT_FROM_WIN32(ERROR_INVALID_FUNCTION));
+        }
+
+        std::array<APPLICATION_PARAMETER, 1> parameters {
+            {"InProcessExeLocation", struExeLocation.QueryStr()}
+        };
+        LOG_INFO("Creating handler application");
+        FINISHED_IF_FAILED(m_pfnAspNetCoreCreateApplication(
+            m_pServer,
+            pHttpContext->GetApplication(),
+            parameters.data(),
+            static_cast<DWORD>(parameters.size()),
+            &pApplication));
+
+        m_pApplication = pApplication;
+    }
+
 
 Finished:
 

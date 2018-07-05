@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "AppOfflineTrackingApplication.h"
+
 class OUT_OF_PROCESS_APPLICATION : public AppOfflineTrackingApplication
 {
     enum WEBSOCKET_STATUS

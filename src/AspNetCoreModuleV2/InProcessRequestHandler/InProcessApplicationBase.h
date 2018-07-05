@@ -5,7 +5,7 @@
 
 #include "precomp.hxx"
 #include "application.h"
-#include "requesthandler_config.h"
+#include "AppOfflineTrackingApplication.h"
 
 typedef INT(*hostfxr_main_fn) (CONST DWORD argc, CONST PCWSTR argv[]); // TODO these may need to be BSTRs
 

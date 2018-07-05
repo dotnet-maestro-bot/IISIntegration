@@ -50,10 +50,6 @@ InProcessApplicationBase::Recycle(
     }
     else
     {
-        // IISExpress scenario
-        // Try to graceful shutdown the managed application
-        // and call exit to terminate current process
-        ShutDown();
         // If we set a static callback, we don't want to kill the current process as
         // that will kill the test process and means we are running in hostable webcore mode.
         if (m_pHttpServer.IsCommandLineLaunch()

@@ -188,7 +188,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="application.h" />
+    <ClInclude Include="AppOfflineTrackingApplication.h" />
     <ClInclude Include="environmentvariablehelpers.h" />
     <ClInclude Include="filewatcher.h" />
     <ClInclude Include="NullOutputManager.h" />
@@ -201,6 +201,7 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AppOfflineTrackingApplication.cpp" />
     <ClCompile Include="FileOutputManager.cpp" />
     <ClCompile Include="filewatcher.cpp" />
     <ClCompile Include="requesthandler_config.cpp" />

@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "precomp.hxx"
 #include "InProcessApplicationBase.h"
 #include "inprocesshandler.h"
 #include "requesthandler_config.h"

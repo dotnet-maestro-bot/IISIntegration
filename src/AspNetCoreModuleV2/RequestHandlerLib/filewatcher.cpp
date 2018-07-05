@@ -212,7 +212,7 @@ FILE_WATCHER_ENTRY::FILE_WATCHER_ENTRY(FILE_WATCHER *   pFileMonitor) :
     _pFileMonitor(pFileMonitor),
     _hDirectory(INVALID_HANDLE_VALUE),
     _hImpersonationToken(NULL),
-    _pApplication(NULL),
+    _pCallback(),
     _lStopMonitorCalled(0),
     _cRefs(1),
     _fIsValid(TRUE)
@@ -336,7 +336,7 @@ Finished:
         //
         // so far we only monitoring app_offline
         //
-        _pApplication->OnAppOffline();
+        _pCallback();
     }
     return hr;
 }
@@ -397,7 +397,7 @@ HRESULT
 FILE_WATCHER_ENTRY::Create(
     _In_ PCWSTR                  pszDirectoryToMonitor,
     _In_ PCWSTR                  pszFileNameToMonitor,
-    _In_ IAPPLICATION*           pApplication,
+    _In_ std::function<void()>   pCallback,
     _In_ HANDLE                  hImpersonationToken
 )
 {
@@ -406,7 +406,7 @@ FILE_WATCHER_ENTRY::Create(
 
     if (pszDirectoryToMonitor == NULL ||
         pszFileNameToMonitor == NULL ||
-        pApplication == NULL)
+        pCallback == NULL)
     {
         DBG_ASSERT(FALSE);
         hr = HRESULT_FROM_WIN32(ERROR_INVALID_PARAMETER);
@@ -416,7 +416,7 @@ FILE_WATCHER_ENTRY::Create(
     //
     //remember the application
     //
-    _pApplication = pApplication;
+    _pCallback = pCallback;
 
     if (FAILED(hr = _strFileName.Copy(pszFileNameToMonitor)))
     {

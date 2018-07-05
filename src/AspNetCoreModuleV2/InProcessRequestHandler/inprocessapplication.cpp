@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+#include "precomp.hxx"
 #include "inprocessapplication.h"
 #include "inprocesshandler.h"
 #include "hostfxroptions.h"
@@ -28,7 +29,8 @@ IN_PROCESS_APPLICATION::IN_PROCESS_APPLICATION(
     m_ProcessExitCode(0),
     m_fBlockCallbacksIntoManaged(FALSE),
     m_fShutdownCalledFromNative(FALSE),
-    m_fShutdownCalledFromManaged(FALSE)
+    m_fShutdownCalledFromManaged(FALSE),
+    m_pConfig(std::move(pConfig))
 {
     // is it guaranteed that we have already checked app offline at this point?
     // If so, I don't think there is much to do here.

@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "stdafx.h"
-#include "iapplication.h"
+#include <Windows.h>
+#include <functional>
 
 #define FILE_WATCHER_SHUTDOWN_KEY           (ULONG_PTR)(-1)
 #define FILE_WATCHER_ENTRY_BUFFER_SIZE      4096
@@ -60,7 +60,7 @@ public:
     Create(
         _In_ PCWSTR                  pszDirectoryToMonitor,
         _In_ PCWSTR                  pszFileNameToMonitor,
-        _In_ IAPPLICATION*           pApplication,
+        _In_ std::function<void()>   pCallback,
         _In_ HANDLE                  hImpersonationToken
         );
 
@@ -109,13 +109,13 @@ private:
     HANDLE                  _hImpersonationToken;
     HANDLE                  _hDirectory;
     FILE_WATCHER*           _pFileMonitor;
-    IAPPLICATION*           _pApplication;
     STRU                    _strFileName;
     STRU                    _strDirectoryName;
     LONG                    _lStopMonitorCalled;
     mutable LONG            _cRefs;
     BOOL                    _fIsValid;
     SRWLOCK                 _srwLock;
+    std::function<void()>   _pCallback;
 };
 
 

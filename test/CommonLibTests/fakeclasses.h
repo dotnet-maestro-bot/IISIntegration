@@ -41,7 +41,6 @@ public:
 class MockElement : public IAppHostElement
 {
 public:
-
     MOCK_METHOD2_WITH_CALLTYPE(__stdcall, QueryInterface, HRESULT(REFIID riid, void ** ppvObject));
     MOCK_METHOD0_WITH_CALLTYPE(__stdcall, AddRef, ULONG());
     MOCK_METHOD0_WITH_CALLTYPE(__stdcall, Release, ULONG());

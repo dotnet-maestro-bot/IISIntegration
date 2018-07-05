@@ -107,14 +107,6 @@ ASPNET_CORE_PROXY_MODULE::OnExecuteRequestHandler(
             goto Finished;
         }
 
-        // app_offline check to avoid loading aspnetcorerh.dll unnecessarily
-        if (m_pApplicationInfo->CheckIfAppOfflinePresent())
-        {
-            m_pApplicationInfo->ServeAppOffline(pHttpContext->GetResponse());
-            retVal = RQ_NOTIFICATION_FINISH_REQUEST;
-            goto Finished;
-        }
-
         // make sure assmebly is loaded and application is created
         hr = m_pApplicationInfo->EnsureApplicationCreated(pHttpContext);
         if (FAILED(hr))
@@ -125,22 +117,17 @@ ASPNET_CORE_PROXY_MODULE::OnExecuteRequestHandler(
         m_pApplicationInfo->ExtractApplication(&pApplication);
 
         DBG_ASSERT(pHttpContext);
-        // make sure application is in running state
-        // cannot recreate the application as we cannot reload clr for inprocess
-        if (pApplication->QueryStatus() == APPLICATION_STATUS::OFFLINE)
-        {
-            pApplicationManager->RecycleApplicationFromManager(m_pApplicationInfo->QueryConfig()->QueryConfigPath()->QueryStr());
-        }
-        else if (pApplication->QueryStatus() != APPLICATION_STATUS::RUNNING &&
-                 pApplication->QueryStatus() != APPLICATION_STATUS::STARTING)
+        
+        // We allow OFFLINE application to serve pages
+        if (pApplication->QueryStatus() != APPLICATION_STATUS::RUNNING &&
+            pApplication->QueryStatus() != APPLICATION_STATUS::STARTING)
         {
             hr = HRESULT_FROM_WIN32(ERROR_SERVER_DISABLED);
             goto Finished;
         }
 
         // Create RequestHandler and process the request
-        hr = pApplication->CreateHandler(pHttpContext,
-                    &m_pHandler);
+        hr = pApplication->CreateHandler(pHttpContext, &m_pHandler);
 
         if (FAILED(hr))
         {
