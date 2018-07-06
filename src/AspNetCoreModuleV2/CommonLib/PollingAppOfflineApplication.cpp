@@ -82,6 +82,8 @@ HRESULT PollingAppOfflineApplication::LoadAppOfflineContent()
         std::string pszBuff(li.LowPart + 1, '\0');
 
         RETURN_LAST_ERROR_IF(!ReadFile(handle, pszBuff.data(), li.LowPart, &bytesRead, NULL));
+        pszBuff.resize(bytesRead);
+
         m_strAppOfflineContent = pszBuff;
     }
 

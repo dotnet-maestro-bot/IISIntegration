@@ -82,6 +82,8 @@ APPLICATION_INFO::EnsureApplicationCreated(
         if (m_pApplication->QueryStatus() == OFFLINE)
         {
             LOG_INFO("Application went offline");
+            // Application that went offline
+            // are supposed to recycle themselves
             m_pApplication->DereferenceApplication();
             m_pApplication = nullptr;
         }

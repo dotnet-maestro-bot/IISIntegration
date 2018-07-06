@@ -23,13 +23,12 @@ public:
     APPLICATION_STATUS QueryStatus() override;
     bool AppOfflineExists();
     HRESULT LoadAppOfflineContent();
-    void ReloadAppOffline();
     static bool ShouldBeStarted(IHttpApplication& pApplication);
     void ShutDown() override;
     void Recycle() override;
 
 private:
-    static const int c_appOfflineRefreshIntervalMS = 1000;
+    static const int c_appOfflineRefreshIntervalMS = 200;
     static std::experimental::filesystem::path GetAppOfflineLocation(IHttpApplication& pApplication);
     std::string m_strAppOfflineContent;
     ULONGLONG m_ulLastCheckTime;

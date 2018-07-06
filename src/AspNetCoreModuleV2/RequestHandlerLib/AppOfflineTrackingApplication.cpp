@@ -6,6 +6,8 @@
 #include "EventLog.h"
 #include "exceptions.h"
 
+extern HANDLE g_hEventLog;
+
 HRESULT AppOfflineTrackingApplication::StartMonitoringAppOffline()
 {
     LOG_INFOF("Starting app_offline monitoring in application %S", m_applicationPath.c_str());
@@ -47,7 +49,7 @@ void AppOfflineTrackingApplication::OnAppOffline()
 {
     LOG_INFOF("Received app_offline notification in application %S", m_applicationPath.c_str());
     m_fileWatcherEntry->StopMonitor();
-    m_status = APPLICATION_STATUS::SHUTDOWN;
+    m_status = APPLICATION_STATUS::OFFLINE;
     UTILITY::LogEventF(g_hEventLog,
                        EVENTLOG_INFORMATION_TYPE,
                        ASPNETCORE_EVENT_RECYCLE_APPOFFLINE,

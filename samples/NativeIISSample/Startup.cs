@@ -99,6 +99,8 @@ namespace NativeIISSample
         {
             var host = new WebHostBuilder()
                 .UseIIS()
+                .UseKestrel()
+                .UseIISIntegration()
                 .UseStartup<Startup>()
                 .Build();
 

@@ -24,7 +24,7 @@ public:
     {
         DBG_ASSERT(m_cRefs != 0);
 
-        if (InterlockedDecrement(&m_cRefs))
+        if (InterlockedDecrement(&m_cRefs) == 0)
         {
             delete this;
         }

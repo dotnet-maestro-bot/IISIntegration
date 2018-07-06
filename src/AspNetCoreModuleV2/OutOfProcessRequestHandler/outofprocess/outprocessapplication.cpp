@@ -1,4 +1,5 @@
 #include "..\precomp.hxx"
+#include "SRWExclusiveLock.h"
 
 OUT_OF_PROCESS_APPLICATION::OUT_OF_PROCESS_APPLICATION(
     IHttpApplication& pApplication,
@@ -14,6 +15,7 @@ OUT_OF_PROCESS_APPLICATION::OUT_OF_PROCESS_APPLICATION(
 
 OUT_OF_PROCESS_APPLICATION::~OUT_OF_PROCESS_APPLICATION()
 {
+    SRWExclusiveLock lock(m_srwLock);
     if (m_pProcessManager != NULL)
     {
         m_pProcessManager->Shutdown();
@@ -58,15 +60,12 @@ OUT_OF_PROCESS_APPLICATION::GetProcess(
 __override
 VOID
 OUT_OF_PROCESS_APPLICATION::ShutDown()
-{
-    AcquireSRWLockExclusive(&m_srwLock);
+{   
+    SRWExclusiveLock lock(m_srwLock);
+    if (m_pProcessManager != NULL)
     {
-        if (m_pProcessManager != NULL)
-        {
-            m_pProcessManager->Shutdown();
-        }
+        m_pProcessManager->Shutdown();
     }
-    ReleaseSRWLockExclusive(&m_srwLock);
 }
 
 __override
