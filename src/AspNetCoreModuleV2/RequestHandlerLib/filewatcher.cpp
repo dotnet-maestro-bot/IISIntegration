@@ -413,9 +413,6 @@ FILE_WATCHER_ENTRY::Create(
         goto Finished;
     }
 
-    //
-    //remember the application
-    //
     _pCallback = pCallback;
 
     if (FAILED(hr = _strFileName.Copy(pszFileNameToMonitor)))

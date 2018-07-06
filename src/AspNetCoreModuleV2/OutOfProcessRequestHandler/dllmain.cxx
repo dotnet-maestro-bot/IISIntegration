@@ -303,11 +303,9 @@ CreateApplication(
     UNREFERENCED_PARAMETER(pParameters);
     UNREFERENCED_PARAMETER(nParameters);
     
-    REQUESTHANDLER_CONFIG *pConfig = NULL;
-
-    // Initialze some global variables here
     InitializeGlobalConfiguration(pServer);
 
+    REQUESTHANDLER_CONFIG *pConfig = nullptr;
     RETURN_IF_FAILED(REQUESTHANDLER_CONFIG::CreateRequestHandlerConfig(pServer, pHttpApplication, &pConfig));
     std::unique_ptr<REQUESTHANDLER_CONFIG> pSharedConfig(pConfig);
 

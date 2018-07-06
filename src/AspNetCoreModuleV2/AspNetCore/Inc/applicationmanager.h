@@ -101,7 +101,7 @@ public:
                 m_pApplicationInfoHash = new APPLICATION_INFO_HASH();
             }
             CATCH_RETURN();
-            RETURN_IF_FAILED( m_pApplicationInfoHash->Initialize(DEFAULT_HASH_BUCKETS));
+            RETURN_IF_FAILED(m_pApplicationInfoHash->Initialize(DEFAULT_HASH_BUCKETS));
         }
         return S_OK;
     }

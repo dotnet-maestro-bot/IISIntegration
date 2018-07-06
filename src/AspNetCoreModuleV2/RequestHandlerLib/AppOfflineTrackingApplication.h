@@ -21,15 +21,15 @@ public:
 
     HRESULT
     StartMonitoringAppOffline();
-
-    HRESULT
-    StartMonitoringAppOflineImpl();
-
+    
     virtual
     VOID
     OnAppOffline();
 
 private:
+    HRESULT
+    StartMonitoringAppOflineImpl();
+
     std::wstring                                 m_applicationPath;
     std::unique_ptr<FILE_WATCHER>                m_fileWatcher;
     std::unique_ptr<FILE_WATCHER_ENTRY, FILE_WATCHER_ENTRY_DELETER>  m_fileWatcherEntry;

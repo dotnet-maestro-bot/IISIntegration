@@ -134,7 +134,6 @@ APPLICATION_INFO::EnsureApplicationCreated(
         m_pApplication = pApplication;
     }
 
-
 Finished:
 
     if (FAILED(hr))

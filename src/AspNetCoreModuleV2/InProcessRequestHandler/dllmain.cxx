@@ -4,7 +4,6 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 
 #include "precomp.hxx"
-#include <IPHlpApi.h>
 #include <VersionHelpers.h>
 
 #include "inprocessapplication.h"
@@ -92,7 +91,6 @@ CreateApplication(
 
     try
     {
-        // Initialize some global variables here
         RETURN_IF_FAILED(InitializeGlobalConfiguration(pServer));
         
         REQUESTHANDLER_CONFIG *pConfig = nullptr;

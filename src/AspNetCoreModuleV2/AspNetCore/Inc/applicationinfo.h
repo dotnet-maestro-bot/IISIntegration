@@ -10,7 +10,6 @@
 #include "iapplication.h"
 #include "SRWSharedLock.h"
 
-
 #define API_BUFFER_TOO_SMALL 0x80008098
 
 typedef
