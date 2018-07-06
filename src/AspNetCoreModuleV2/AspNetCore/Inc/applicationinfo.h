@@ -33,7 +33,7 @@ public:
         m_pServer(NULL),
         m_cRefs(1),
         m_fValid(FALSE),
-        m_fDoneAppCreation(FALSE),
+        m_fAppCreationAttempted(FALSE),
         m_pConfiguration(NULL),
         m_pfnAspNetCoreCreateApplication(NULL)
     {
@@ -125,7 +125,7 @@ private:
     mutable LONG            m_cRefs;
     STRU                    m_struInfoKey;
     BOOL                    m_fValid;
-    BOOL                    m_fDoneAppCreation;
+    BOOL                    m_fAppCreationAttempted;
     ASPNETCORE_SHIM_CONFIG *m_pConfiguration;
     IAPPLICATION           *m_pApplication;
     SRWLOCK                 m_srwLock;

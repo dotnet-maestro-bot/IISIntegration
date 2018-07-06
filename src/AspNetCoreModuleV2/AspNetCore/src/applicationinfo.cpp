@@ -93,7 +93,7 @@ APPLICATION_INFO::EnsureApplicationCreated(
             FINISHED(S_OK);   
         }
     }
-    else if (m_fDoneAppCreation)
+    else if (m_fAppCreationAttempted)
     {
         // previous CreateApplication failed
         FINISHED(E_APPLICATION_ACTIVATION_EXEC_FAILURE);
@@ -112,7 +112,7 @@ APPLICATION_INFO::EnsureApplicationCreated(
         // FindRequestHandlerAssembly obtains a global lock, but after releasing the lock,
         // there is a period where we could call
 
-        m_fDoneAppCreation = TRUE;
+        m_fAppCreationAttempted = TRUE;
         FINISHED_IF_FAILED(FindRequestHandlerAssembly(struExeLocation));
 
         if (m_pfnAspNetCoreCreateApplication == NULL)
