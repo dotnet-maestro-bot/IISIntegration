@@ -7,6 +7,9 @@
 #include "inprocessapplication.h"
 #include "fakeclasses.h"
 
+using ::testing::_;
+using ::testing::NiceMock;
+
 // Externals defined in inprocess
 BOOL       g_fProcessDetach;
 HANDLE     g_hEventLog;
@@ -16,7 +19,11 @@ namespace InprocessTests
     TEST(InProcessTest, NoNullRefForExePath)
     {
         MockHttpServer server;
-        MockHttpApplication application;
+        NiceMock<MockHttpApplication> application;
+
+        ON_CALL(application, GetApplicationPhysicalPath())
+            .WillByDefault(testing::Return(L"Some path"));
+
         auto requestHandlerConfig = std::unique_ptr<REQUESTHANDLER_CONFIG>(MockRequestHandlerConfig::CreateConfig());
 
         std::wstring exePath(L"hello");
